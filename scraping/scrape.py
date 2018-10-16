@@ -1,49 +1,82 @@
 import bs4
-from urllib.request import urlopen #, urlretrieve
-#from urllib.parse import unquote
+import os
+import sys
+import time
+from datetime import timedelta
+from urllib.request import urlopen
 
-# the root of the site
-root_url = "http://powerlisting.wikia.com"
+def main():
+    import json
+    # get a start time
+    start_time = time.time()
 
-# use the power list url as the base to get other urls from
-start_url = "/wiki/Category:Powers"
+    # if the powers list does not exist, then get the list and save it
+    if (os.path.exists("allpowers.json") == False):
+        print("Getting list of powers...")
+        json = urlopen("http://powerlisting.wikia.com/api/v1/Articles/List?category=Powers&limit=15000").read()
+        with open("allpowers.json", "wb") as f:
+            f.write(json)
 
-# a place to store the power urls found so we can parse them later
-urls = set()
-# the starting url
-next_url = "{}{}".format(root_url, start_url)
-while (next_url != None):
-    # DEBUG print the url being worked on
-    print(next_url)
-    # get the page source
-    html = urlopen(next_url).read()
-    # create a soup object from the html
-    soup = bs4.BeautifulSoup(html, features="html.parser")
-    # look for links in the tables
-    tables = soup.findChildren("table")
-    # only look through the second table for <a> tags
-    for ref in tables[1].findChildren("a", href=True):
-        # get the url from the tag
-        power_url = ref["href"]
-        # check that the url is not a category url
-        #if ("Category:" not in power_url):
-        # add the url our set of urls
-        urls.add("{}{}".format(root_url, power_url))
-    # get the next page <a> tag
-    next_page = soup.find("a", href=True, text="next 200")
-    # get the url from the tag if the tag was found
-    if (next_page == None):
-        next_url = None
-    else:
-        next_url = "{}{}".format(root_url, next_page["href"])
+    # load the powers list from the json file
+    with open("allpowers.json", "r") as f:
+        data = json.load(f)
 
-# DEBUG: sort the urls set
-sorted_list = sorted(urls)
-# DEBUG: write the urls to file
-with open("powers.txt", "w") as f:
-    # DEBUG: print the urls
-    for url in sorted_list:
-        f.write("{}\n".format(url))
-        print(url)
-# DEBUG: print the url count
-print("url count: {}".format(len(urls)))
+    # create a dictionary to store the read powers
+    powers = dict()
+
+    # read each power and save to the dictionary
+    print("Getting all power data...")
+    total = len(data["items"])
+    count = 0
+    for item in data["items"]:
+        # get our power id and title
+        power_id = item["id"]
+        power_name = item["title"]
+        # DEBUG: print the power that is being saved
+        #print(power_name)
+        # create our url to pull data from
+        url = "http://powerlisting.wikia.com/api/v1/Articles/AsSimpleJson?id={}".format(power_id)
+        # get the power json and add the power to the dictionary
+        powers[power_name] = json.loads(urlopen(url).read())["sections"]
+        # update the count
+        count = count + 1
+        # update the progress
+        if (count % 10 == 0):
+            percent = (count / total) * 100
+            print_progress(percent)
+    # update the progress to 100%
+    print_progress(100.0)
+
+    # save the dictionary as json as a more readable format
+    print("\nWriting files...")
+    with open("powerdatapretty.json", "w") as f:
+        json.dump(powers, f, indent=4)
+
+    # save the dictionary as json
+    with open("powerdata.json", "w") as f:
+        json.dump(powers, f)
+
+    # print the overall time to run
+    total_time = time.time() - start_time
+    print("Done.\nTotal Time: {}".format(timedelta(seconds=total_time)))
+
+# create a text progress bar
+def print_progress(percent: float):
+    # the number of bars to write
+    bars = 50
+    pendr = "|"
+    pendl = "|"
+    pchar = "█"
+    nchar = "░"
+    # the percentage each bar represents
+    chunk = int(100 / bars)
+    # the number of filled bars
+    barcount = int(percent / chunk)
+    # put all the peices together
+    pbar = pendl + (barcount * pchar) + ((bars - barcount) * nchar) + pendr
+    # output the progress bar
+    sys.stdout.write("\r{} {:.2f}%  ".format(pbar, percent))
+    sys.stdout.flush()
+
+if (__name__ == "__main__"):
+    main()
