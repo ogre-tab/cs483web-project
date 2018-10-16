@@ -1,34 +1,39 @@
-import bs4
 import os
 import sys
 import time
 from datetime import timedelta
 from urllib.request import urlopen
 
+power_list_file = "powers_list.json"
+power_data_file = "powers_data.json"
+indented_power_data_file = "indented_powers_data.json"
+
 def main():
     import json
     # get a start time
     start_time = time.time()
 
+    power_list = None
     # if the powers list does not exist, then get the list and save it
-    if (os.path.exists("allpowers.json") == False):
+    if (os.path.isfile(power_list_file) == False):
         print("Getting list of powers...")
         json = urlopen("http://powerlisting.wikia.com/api/v1/Articles/List?category=Powers&limit=15000").read()
-        with open("allpowers.json", "wb") as f:
+        power_list = json.load(json)
+        with open(power_list_file, "wb") as f:
             f.write(json)
-
-    # load the powers list from the json file
-    with open("allpowers.json", "r") as f:
-        data = json.load(f)
+    else:
+        # load the powers list from the json file
+        with open(power_list_file, "r") as f:
+            power_list = json.load(f)
 
     # create a dictionary to store the read powers
     powers = dict()
 
     # read each power and save to the dictionary
     print("Getting all power data...")
-    total = len(data["items"])
+    total = len(power_list["items"])
     count = 0
-    for item in data["items"]:
+    for item in power_list["items"]:
         # get our power id and title
         power_id = item["id"]
         power_name = item["title"]
@@ -49,16 +54,16 @@ def main():
 
     # save the dictionary as json as a more readable format
     print("\nWriting files...")
-    with open("powerdatapretty.json", "w") as f:
+    with open(indented_power_data_file, "w") as f:
         json.dump(powers, f, indent=4)
 
     # save the dictionary as json
-    with open("powerdata.json", "w") as f:
+    with open(power_data_file, "w") as f:
         json.dump(powers, f)
 
     # print the overall time to run
     total_time = time.time() - start_time
-    print("Done.\nTotal Time: {}".format(timedelta(seconds=total_time)))
+    print("Done.\nTotal Time: {}\nPower Count: {}".format(timedelta(seconds=total_time), count))
 
 # create a text progress bar
 def print_progress(percent: float):
