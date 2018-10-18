@@ -1,15 +1,19 @@
 import os
 import sys
 import time
+import json
 from datetime import timedelta
 from urllib.request import urlopen
 
-power_list_file = "powers_list.json"
-power_data_file = "powers_data.json"
-indented_power_data_file = "indented_powers_data.json"
+power_list_file = "powerData/powers_list.json"
+
+power_data_file = "powerData/powers_data.json"
+save_power_data = True
+
+indented_power_data_file = "powerData/indented_powers_data.json"
+save_indented_power_data = True
 
 def main():
-    import json
     # get a start time
     start_time = time.time()
 
@@ -17,16 +21,18 @@ def main():
     # if the powers list does not exist, then get the list and save it
     if (os.path.isfile(power_list_file) == False):
         print("Getting list of powers...")
-        json = urlopen("http://powerlisting.wikia.com/api/v1/Articles/List?category=Powers&limit=15000").read()
-        power_list = json.load(json)
+        json_data = urlopen("http://powerlisting.wikia.com/api/v1/Articles/List?category=Powers&limit=15000").read()
+        # load the powers list from the json data
+        power_list = json.loads(json_data.decode("utf-8"))
+        # save the powers list from the json data
         with open(power_list_file, "wb") as f:
-            f.write(json)
+            f.write(json_data)
     else:
         # load the powers list from the json file
         with open(power_list_file, "r") as f:
             power_list = json.load(f)
 
-    # create a dictionary to store the read powers
+    # create a dictionary to store the powers
     powers = dict()
 
     # read each power and save to the dictionary
@@ -37,8 +43,6 @@ def main():
         # get our power id and title
         power_id = item["id"]
         power_name = item["title"]
-        # DEBUG: print the power that is being saved
-        #print(power_name)
         # create our url to pull data from
         url = "http://powerlisting.wikia.com/api/v1/Articles/AsSimpleJson?id={}".format(power_id)
         # get the power json and add the power to the dictionary
@@ -51,15 +55,19 @@ def main():
             print_progress(percent)
     # update the progress to 100%
     print_progress(100.0)
+    print()
 
-    # save the dictionary as json as a more readable format
-    print("\nWriting files...")
-    with open(indented_power_data_file, "w") as f:
-        json.dump(powers, f, indent=4)
+    # save the dictionary as json in a more readable format
+    if (save_indented_power_data == True):
+        print("Writing '{}' file...".format(indented_power_data_file))
+        with open(indented_power_data_file, "w") as f:
+            json.dump(powers, f, indent=4)
 
     # save the dictionary as json
-    with open(power_data_file, "w") as f:
-        json.dump(powers, f)
+    if (save_power_data == True):
+        print("Writing '{}' file...".format(power_data_file))
+        with open(power_data_file, "w") as f:
+            json.dump(powers, f)
 
     # print the overall time to run
     total_time = time.time() - start_time

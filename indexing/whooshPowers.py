@@ -5,7 +5,7 @@ from whoosh.index import create_in
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.qparser import QueryParser, MultifieldParser
 
-db_file = "../scraping/powers.db"
+db_file = "../scraping/powerData/powers.db"
 index_directory_name = "whooshIndex"
 
 def main():

@@ -2,8 +2,8 @@ import sqlite3
 import json
 
 # file names
-power_data_file = "powers_data.json"
-db_file = "powers.db"
+power_data_file = "powerData/powers_data.json"
+db_file = "powerData/powers.db"
 
 # attributes to find
 alias_search = [ "also cal", "also known", "also named"]
