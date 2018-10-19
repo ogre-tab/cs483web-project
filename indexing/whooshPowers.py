@@ -1,29 +1,65 @@
 import os
-import sys
 import sqlite3
-from whoosh.index import create_in
-from whoosh.fields import Schema, TEXT, ID
-from whoosh.qparser import QueryParser, MultifieldParser
+import sys
+
+from PyQt5.QtWidgets import QApplication
+from whoosh.fields import ID, TEXT, Schema
+from whoosh.index import Index, create_in, open_dir
+from whoosh.qparser import MultifieldParser
 
 db_file = "../scraping/powerData/powers.db"
 index_directory_name = "whooshIndex"
 
+# TODO:
+# should check if index has the same number of documents as tuples in database
+# should check if our index has any documents
+# command line options: help, gui
+# help shows the gui command
+# the gui command starts the program with a gui
+# create interactive shell
+# CTRL+C should end the interactive shell
+# clean up gui
+# if the gui can't start, asks the user if they want an interactive shell instead
+
+
 def main():
-    searchTerm = "Strength"
-    indexer = createNewIndex()
-    #results = search(indexer, searchTerm)
-    search(indexer, searchTerm)
+    # create a new index from our database
+    # indexer = createNewIndex()
+    # search the index with a predefined term
+    # searchTerm = "Strength"
+    # search(indexer, searchTerm)
+
+    # load a prebuilt index
+    indexer = loadIndex()
+
+    # this will start our gui
+    startUI(indexer)
+
+
+def startUI(indexer: Index):
+    # import our gui code
+    from whooshPowersGui import WhooshGui
+    # create an application
+    app = QApplication(sys.argv)
+    # create our window
+    window = WhooshGui(indexer)
+    # show our window
+    window.show()
+    # wait until our application ends
+    app.exec_()
+
 
 # check ifour index directory exists
 def checkForIndexDirectory():
     try:
         # if the directory is not found, then create the directory
-        if (os.path.isdir(index_directory_name) == False):
+        if (os.path.isdir(index_directory_name) is False):
             os.mkdir(index_directory_name)
     except Exception as e:
         # print an error and exit
         print("Unable to create index directory '{}':\n{}".format(index_directory_name, e))
         sys.exit(1)
+
 
 def search(indexer, searchTerm):
     # NOTE: can add a different weighting system by adding the term to the searcher(weighting.here())
@@ -33,6 +69,24 @@ def search(indexer, searchTerm):
         print("Length of results: " + str(len(results)))
         for line in results:
             print(line["name"] + ": " + line["description"])
+
+
+def loadIndex():
+    # check that our index directory exists
+    checkForIndexDirectory()
+    # create the schema for our index
+    schema = Schema(name=TEXT(stored=True),
+                    description=TEXT(stored=True),
+                    alias=TEXT(stored=True),
+                    application=TEXT(stored=True),
+                    capability=TEXT(stored=True),
+                    user=TEXT(stored=True),
+                    limitation=TEXT(stored=True),
+                    path=ID(unique=True))
+    # load the index from our specified directory
+    indexer = open_dir(index_directory_name, schema=schema)
+    return indexer
+
 
 def createNewIndex():
     # check that our index directory exists
@@ -85,8 +139,9 @@ def createNewIndex():
     print("Index created.")
     return indexer
 
+
 # execute some sql and return true on an error
-def executeSql(dbfile: str, sql: str, values = None) -> bool:
+def executeSql(dbfile: str, sql: str, values=None) -> bool:
     # a place to store the connection object
     conn = None
     # did the command return an error
@@ -98,7 +153,7 @@ def executeSql(dbfile: str, sql: str, values = None) -> bool:
         # create a cursor
         cur = conn.cursor()
         # check if there are any values to use and execute the sql
-        if (values == None):
+        if (values is None):
             cur.execute(sql)
         else:
             cur.execute(sql, values)
@@ -111,13 +166,14 @@ def executeSql(dbfile: str, sql: str, values = None) -> bool:
         result = False
     finally:
         # close the connection
-        if (conn != None):
+        if (conn is not None):
             conn.close()
     # return the error value
     return result
 
+
 # execute some sql and return the data
-def readSqlData(dbfile: str, sql: str, values = None) -> object:
+def readSqlData(dbfile: str, sql: str, values=None) -> object:
     # a place to store the connection object
     conn = None
     # value returned from the sql statement
@@ -129,7 +185,7 @@ def readSqlData(dbfile: str, sql: str, values = None) -> object:
         # create a cursor
         cur = conn.cursor()
         # check if there are any values to use and execute the sql
-        if (values == None):
+        if (values is None):
             data = list(cur.execute(sql))
         else:
             data = list(cur.execute(sql, values))
@@ -140,10 +196,11 @@ def readSqlData(dbfile: str, sql: str, values = None) -> object:
         data = None
     finally:
         # close the connection
-        if (conn != None):
+        if (conn is not None):
             conn.close()
     # return the error value
     return data
+
 
 if __name__ == '__main__':
     main()
