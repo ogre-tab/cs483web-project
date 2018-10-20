@@ -1,6 +1,8 @@
 import os
+import signal
 import sqlite3
 import sys
+import ntpath
 
 from PyQt5.QtWidgets import QApplication
 from whoosh.fields import ID, TEXT, Schema
@@ -9,6 +11,9 @@ from whoosh.qparser import MultifieldParser
 
 db_file = "../scraping/powerData/powers.db"
 index_directory_name = "whooshIndex"
+
+help_argument = "--help"
+gui_argument = "--gui"
 
 # TODO:
 # should check if index has the same number of documents as tuples in database
@@ -23,6 +28,9 @@ index_directory_name = "whooshIndex"
 
 
 def main():
+    # register signal handler for sigint
+    signal.signal(signal.SIGINT, sigint_handler)
+
     # create a new index from our database
     # indexer = createNewIndex()
     # search the index with a predefined term
@@ -32,8 +40,48 @@ def main():
     # load a prebuilt index
     indexer = loadIndex()
 
-    # this will start our gui
-    startUI(indexer)
+    # check arguments
+    if (len(sys.argv) == 1):
+        # run terminal
+        startTerminal(indexer)
+    # check for our gui flag
+    elif (gui_argument in sys.argv):
+        # try to start the gui
+        try:
+            # this will start our gui
+            startUI(indexer)
+        except Exception:
+            # ask the user if they want a terminal session
+            result = input("The user interface failed to load. Run in temrinal? [y/n] ")
+            # if yes, start a terminal session
+            if (result.lower() == "y" or result.lower() == "yes"):
+                startTerminal(indexer)
+            else:
+                # otherwise, end the program
+                sys.exit(10)
+    # check for our help flag
+    elif (help_argument in sys.argv):
+        printHelp()
+    else:
+        # anything else, print the help message
+        printHelp()
+
+
+def printHelp():
+    print("Usage: {} [{}, {}]".format(ntpath.basename(sys.argv[0]), help_argument, gui_argument))
+    print("\t{}: Starts a graphical interface.".format(gui_argument))
+    print("\t{}: Prints this message.".format(help_argument))
+
+
+def startTerminal(indexer: Index):
+    print("To exit, press ENTER with no search term.")
+    runTerminal = True
+    while (runTerminal is True):
+        searchTerm = input("Enter a search term: ")
+        if (searchTerm == ""):
+            runTerminal = False
+        else:
+            search(indexer, searchTerm)
 
 
 def startUI(indexer: Index):
@@ -47,6 +95,16 @@ def startUI(indexer: Index):
     window.show()
     # wait until our application ends
     app.exec_()
+
+
+# handles ctrl+c (SIGINT)
+def sigint_handler(sig, frame):
+    try:
+        # try to exit
+        sys.exit(0)
+    except SystemExit:
+        # if that fails, force the exit
+        os._exit(1)
 
 
 # check ifour index directory exists
@@ -66,9 +124,10 @@ def search(indexer, searchTerm):
     with indexer.searcher() as searcher:
         query = MultifieldParser(["name", "description"], schema=indexer.schema).parse(searchTerm)
         results = searcher.search(query)
-        print("Length of results: " + str(len(results)))
+        print("\n====== Results for '{}'\n".format(searchTerm))
         for line in results:
-            print(line["name"] + ": " + line["description"])
+            print("{}:\n{}\n".format(line["name"], line["description"]))
+        print("====== Total results: " + str(len(results)))
 
 
 def loadIndex():

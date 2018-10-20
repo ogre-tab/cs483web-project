@@ -1,9 +1,9 @@
 import sys
 
-from PyQt5.QtGui import QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import (QAbstractItemView, QApplication, QGridLayout,
-                             QLabel, QListView, QPushButton, QTextEdit,
-                             QWidget)
+# from PyQt5.QtGui import 
+# from PyQt5.QtCore import QString
+from PyQt5.QtWidgets import (QApplication, QGridLayout, QLabel, QLineEdit,
+                             QListWidget, QPushButton, QTextEdit, QWidget)
 from whoosh.index import Index
 from whoosh.qparser import MultifieldParser
 
@@ -16,9 +16,9 @@ class WhooshGui(QWidget):
         # set the whoosh index
         self.indexer = indexer
         # the search box
-        self.searchTextEdit = None
+        self.searchLineEdit = None
         # the list box
-        self.resultsList = QListView()
+        self.resultsList = QListWidget()
         # the results of our last search
         self.results = None
         # a dictionary for our text widgets
@@ -36,14 +36,14 @@ class WhooshGui(QWidget):
             query = MultifieldParser(self.columns, schema=self.indexer.schema).parse(searchTerm)
             # create a searcher with our query
             temp_results = searcher.search(query)
-            # create a model for our list box
-            model = QStandardItemModel(self.resultsList)
+            # clear our list box
+            self.resultsList.clear()
             # clear our last search results
             self.results = dict()
             # go through our new results
             for line in temp_results:
                 # add the power name to our list box
-                model.appendRow(QStandardItem(line["name"]))
+                self.resultsList.addItem(line["name"])
                 # create a new line of data for our results dictionary
                 inner_dict = dict()
                 for col in self.columns:
@@ -53,27 +53,27 @@ class WhooshGui(QWidget):
                         inner_dict[col] = line[col]
                 # add the results to our dictionary
                 self.results[line["name"]] = inner_dict
-            # add our model to our list box
-            self.resultsList.setModel(model)
 
-    def resultChanged(self, index):
-        # get the name of the clicked item
-        powerName = self.resultsList.model().itemFromIndex(index).text()
-        # get our power's data
-        line = self.results[powerName]
-        # don't modifiy the values of these columns
-        ignore_columns = ["name", "description", "path"]
-        # loop through each column name and set our widget's text
-        for col in self.columns:
-            if (col not in ignore_columns):
-                clean_line = line[col].strip('"').replace('","', '\n')
-                self.widgetDict[col].setPlainText(clean_line)
-            else:
-                self.widgetDict[col].setPlainText(line[col])
+    def resultChanged(self):
+        # check that our list has a selected item
+        if (len(self.resultsList.selectedItems()) >= 1):
+            # get the name of the first selected item
+            powerName = self.resultsList.selectedItems()[0].text()
+            # get our power's data
+            line = self.results[powerName]
+            # don't modifiy the values of these columns
+            ignore_columns = ["name", "description", "path"]
+            # loop through each column name and set our widget's text
+            for col in self.columns:
+                if (col not in ignore_columns):
+                    clean_line = line[col].strip('"').replace('","', '\n')
+                    self.widgetDict[col].setPlainText(clean_line)
+                else:
+                    self.widgetDict[col].setPlainText(line[col])
 
     def searchButtonClicked(self):
         # search for our term
-        self.search(self.searchTextEdit.toPlainText())
+        self.search(self.searchLineEdit.text())
 
     # build our ui
     def initUIWhoosh(self):
@@ -83,16 +83,15 @@ class WhooshGui(QWidget):
         grid.setSpacing(4)
         # set our window's layout
         self.setLayout(grid)
-        # set our list box to read only
-        self.resultsList.setEditTriggers(QAbstractItemView.NoEditTriggers)
         # connect a click event to our list box
-        self.resultsList.clicked.connect(self.resultChanged)
+        self.resultsList.itemSelectionChanged.connect(self.resultChanged)
         # our text boxes will uses these values
         rowSpan = 1
         columnSpan = 2
         # add row 0 widgets, a text box and a button
-        self.searchTextEdit = self.createTextEdit(False)
-        grid.addWidget(self.searchTextEdit, 0, 0, rowSpan, columnSpan)
+        self.searchLineEdit = QLineEdit()
+        self.searchLineEdit.setFixedHeight(32)
+        grid.addWidget(self.searchLineEdit, 0, 0, rowSpan, columnSpan)
 
         searchPushButton = QPushButton("Search")
         searchPushButton.setFixedHeight(32)
@@ -108,6 +107,9 @@ class WhooshGui(QWidget):
         for col in self.columns:
             self.createRow(grid, col, rowCount, rowSpan, columnSpan)
             rowCount = rowCount + 1
+
+        # set this window's title
+        self.setWindowTitle("Powers Index")
 
     def createRow(self, grid: QGridLayout, text: str, row: int, rowSpan: int, columnSpan: int):
         # add a label to our window for this row
