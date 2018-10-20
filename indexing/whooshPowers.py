@@ -1,12 +1,12 @@
+import ntpath
 import os
 import signal
 import sqlite3
 import sys
-import ntpath
 
 from PyQt5.QtWidgets import QApplication
 from whoosh.fields import ID, TEXT, Schema
-from whoosh.index import Index, create_in, open_dir
+from whoosh.index import Index, create_in, exists_in, open_dir
 from whoosh.qparser import MultifieldParser
 
 db_file = "../scraping/powerData/powers.db"
@@ -16,15 +16,7 @@ help_argument = "--help"
 gui_argument = "--gui"
 
 # TODO:
-# should check if index has the same number of documents as tuples in database
-# should check if our index has any documents
-# command line options: help, gui
-# help shows the gui command
-# the gui command starts the program with a gui
-# create interactive shell
-# CTRL+C should end the interactive shell
 # clean up gui
-# if the gui can't start, asks the user if they want an interactive shell instead
 
 
 def main():
@@ -37,8 +29,8 @@ def main():
     # searchTerm = "Strength"
     # search(indexer, searchTerm)
 
-    # load a prebuilt index
-    indexer = loadIndex()
+    # load or build our index
+    indexer = checkIndex()
 
     # check arguments
     if (len(sys.argv) == 1):
@@ -67,6 +59,61 @@ def main():
         printHelp()
 
 
+def checkIndex() -> Index:
+    # check if our index directory exists
+    if (os.path.isdir(index_directory_name) is False):
+        try:
+            # create the index directory
+            os.mkdir(index_directory_name)
+        except Exception as e:
+            # print an error and exit
+            print("Unable to create index directory '{}':\n{}".format(index_directory_name, e))
+            sys.exit(1)
+        # our index directory doesn't exist, so create our index and return it
+        return createNewIndex()
+    else:
+        # check if our index is valid
+        if (exists_in(index_directory_name) is False):
+            # our index is invalid, so create our index and return it
+            return createNewIndex()
+        # try to load the index
+        indexer = loadIndex()
+        # check if the index was loaded
+        if (indexer is None):
+            # build and return the index because the index didn't load
+            return createNewIndex()
+        elif (indexer.is_empty is True):
+            # build and return the index because the index is empty
+            return createNewIndex()
+        else:
+            # set some values for our counts that shouldn't exist
+            doc_count = -100
+            db_count = -10
+            # get the number of documents in our index
+            try:
+                doc_count = indexer.doc_count()
+            except Exception:
+                # unable to read from the index, rebuild it
+                print("Unable to read from index.")
+                return createNewIndex()
+            # get the number of rows in our database
+            try:
+                db_count = readSqlData(db_file, "SELECT COUNT(name) FROM powers")[0][0]
+            except Exception:
+                # if we can't read from the database, we can't build an index, so exit.
+                print("Unable to read from database. Exiting.")
+                sys.exit(1)
+            # compare our counts
+            if (doc_count == db_count):
+                # the counts are the same, return our index
+                return indexer
+            else:
+                # counts differ, build our index and return it
+                print("Index is incomplete and needs to be built.")
+                return createNewIndex()
+
+
+# print how to use our program
 def printHelp():
     print("Usage: {} [{}, {}]".format(ntpath.basename(sys.argv[0]), help_argument, gui_argument))
     print("\t{}: Starts a graphical interface.".format(gui_argument))
@@ -74,18 +121,22 @@ def printHelp():
 
 
 def startTerminal(indexer: Index):
+    # tell the user how to stop the program
     print("To exit, press ENTER with no search term.")
+    # loop forever asking the user for search terms
     runTerminal = True
     while (runTerminal is True):
         searchTerm = input("Enter a search term: ")
+        # if the search term is blank, then stop the loop
         if (searchTerm == ""):
             runTerminal = False
         else:
+            # otherwise return the search results
             search(indexer, searchTerm)
 
 
 def startUI(indexer: Index):
-    # import our gui code
+    # import our gui code only when we need it
     from whooshPowersGui import WhooshGui
     # create an application
     app = QApplication(sys.argv)
@@ -107,23 +158,14 @@ def sigint_handler(sig, frame):
         os._exit(1)
 
 
-# check ifour index directory exists
-def checkForIndexDirectory():
-    try:
-        # if the directory is not found, then create the directory
-        if (os.path.isdir(index_directory_name) is False):
-            os.mkdir(index_directory_name)
-    except Exception as e:
-        # print an error and exit
-        print("Unable to create index directory '{}':\n{}".format(index_directory_name, e))
-        sys.exit(1)
-
-
 def search(indexer, searchTerm):
     # NOTE: can add a different weighting system by adding the term to the searcher(weighting.here())
     with indexer.searcher() as searcher:
+        # create our query
         query = MultifieldParser(["name", "description"], schema=indexer.schema).parse(searchTerm)
+        # search our index with our query
         results = searcher.search(query)
+        # display the results
         print("\n====== Results for '{}'\n".format(searchTerm))
         for line in results:
             print("{}:\n{}\n".format(line["name"], line["description"]))
@@ -131,25 +173,28 @@ def search(indexer, searchTerm):
 
 
 def loadIndex():
-    # check that our index directory exists
-    checkForIndexDirectory()
-    # create the schema for our index
-    schema = Schema(name=TEXT(stored=True),
-                    description=TEXT(stored=True),
-                    alias=TEXT(stored=True),
-                    application=TEXT(stored=True),
-                    capability=TEXT(stored=True),
-                    user=TEXT(stored=True),
-                    limitation=TEXT(stored=True),
-                    path=ID(unique=True))
-    # load the index from our specified directory
-    indexer = open_dir(index_directory_name, schema=schema)
-    return indexer
+    # try to load our index
+    try:
+        # create the schema for our index
+        schema = Schema(name=TEXT(stored=True),
+                        description=TEXT(stored=True),
+                        alias=TEXT(stored=True),
+                        application=TEXT(stored=True),
+                        capability=TEXT(stored=True),
+                        user=TEXT(stored=True),
+                        limitation=TEXT(stored=True),
+                        path=ID(unique=True))
+        # load the index from our specified directory
+        indexer = open_dir(index_directory_name, schema=schema)
+        # return the loaded index
+        print("Loaded index.")
+        return indexer
+    except Exception:
+        # something happened while loading our index, return None
+        return None
 
 
 def createNewIndex():
-    # check that our index directory exists
-    checkForIndexDirectory()
     # create the schema for our index
     schema = Schema(name=TEXT(stored=True),
                     description=TEXT(stored=True),
@@ -160,6 +205,7 @@ def createNewIndex():
                     limitation=TEXT(stored=True),
                     path=ID(unique=True))
     # create the index our specified directory
+    print("Building index.")
     indexer = create_in(index_directory_name, schema)
 
     # get all the data from our database to add to the index
@@ -168,7 +214,7 @@ def createNewIndex():
     powers = readSqlData(db_file, "SELECT {} FROM powers".format(columns))
 
     # add the database data to the index
-    print("Creating index...")
+    print("Indexing...")
     writer = indexer.writer()
     pad = 0
     for power in powers:
@@ -195,7 +241,7 @@ def createNewIndex():
     sys.stdout.flush()
     writer.commit()
     # return the complete indexer
-    print("Index created.")
+    print("Index built.")
     return indexer
 
 

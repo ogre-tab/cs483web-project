@@ -1,7 +1,5 @@
 import sys
 
-# from PyQt5.QtGui import 
-# from PyQt5.QtCore import QString
 from PyQt5.QtWidgets import (QApplication, QGridLayout, QLabel, QLineEdit,
                              QListWidget, QPushButton, QTextEdit, QWidget)
 from whoosh.index import Index
@@ -17,6 +15,8 @@ class WhooshGui(QWidget):
         self.indexer = indexer
         # the search box
         self.searchLineEdit = None
+        # the results count text box
+        self.resultsCountLabel = None
         # the list box
         self.resultsList = QListWidget()
         # the results of our last search
@@ -53,6 +53,8 @@ class WhooshGui(QWidget):
                         inner_dict[col] = line[col]
                 # add the results to our dictionary
                 self.results[line["name"]] = inner_dict
+            # set our results count
+            self.resultsCountLabel.setText("Results: {}".format(str(len(temp_results))))
 
     def resultChanged(self):
         # check that our list has a selected item
@@ -72,8 +74,13 @@ class WhooshGui(QWidget):
                     self.widgetDict[col].setPlainText(line[col])
 
     def searchButtonClicked(self):
+        # clear our text boxes
+        for col in self.columns:
+            self.widgetDict[col].clear()
         # search for our term
         self.search(self.searchLineEdit.text())
+        # select the first result
+        self.resultsList.setCurrentRow(0)
 
     # build our ui
     def initUIWhoosh(self):
@@ -88,9 +95,11 @@ class WhooshGui(QWidget):
         # our text boxes will uses these values
         rowSpan = 1
         columnSpan = 2
+
         # add row 0 widgets, a text box and a button
         self.searchLineEdit = QLineEdit()
         self.searchLineEdit.setFixedHeight(32)
+        self.searchLineEdit.returnPressed.connect(self.searchButtonClicked)
         grid.addWidget(self.searchLineEdit, 0, 0, rowSpan, columnSpan)
 
         searchPushButton = QPushButton("Search")
@@ -99,11 +108,15 @@ class WhooshGui(QWidget):
         searchPushButton.clicked.connect(self.searchButtonClicked)
         grid.addWidget(searchPushButton, 0, 2)
 
-        # add row 1 widgets, our list box
-        grid.addWidget(self.resultsList, 1, 0, 1, 3)
+        # add row 1 widgets, our results count label
+        self.resultsCountLabel = self.createLabel("Results: 0")
+        grid.addWidget(self.resultsCountLabel, 1, 0, 1, 2)
 
-        # add row 2 through 9 widgets, the other text boxes
-        rowCount = 2
+        # add row 2 widgets, our list box
+        grid.addWidget(self.resultsList, 2, 0, 1, 3)
+
+        # add row 3 through 10 widgets, the other text boxes
+        rowCount = 3
         for col in self.columns:
             self.createRow(grid, col, rowCount, rowSpan, columnSpan)
             rowCount = rowCount + 1
@@ -116,7 +129,7 @@ class WhooshGui(QWidget):
         grid.addWidget(self.createLabel(text.title()), row, 0)
         # create a read only text box
         textEdit = self.createTextEdit(True)
-        # add the text bow to this row
+        # add the text box to this row
         grid.addWidget(textEdit, row, 1, rowSpan, columnSpan)
         # store the widget in our dictionary for use later
         self.widgetDict[text] = textEdit
@@ -137,6 +150,7 @@ class WhooshGui(QWidget):
 
 
 if __name__ == "__main__":
+    # start the gui with no index
     app = QApplication(sys.argv)
     window = WhooshGui(None)
     window.show()
