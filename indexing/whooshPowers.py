@@ -23,31 +23,22 @@ def main():
     # register signal handler for sigint
     signal.signal(signal.SIGINT, sigint_handler)
 
-    # create a new index from our database
-    # indexer = createNewIndex()
-    # search the index with a predefined term
-    # searchTerm = "Strength"
-    # search(indexer, searchTerm)
-
-    # load or build our index
-    indexer = checkIndex()
-
     # check arguments
     if (len(sys.argv) == 1):
         # run terminal
-        startTerminal(indexer)
+        startTerminal()
     # check for our gui flag
     elif (gui_argument in sys.argv):
         # try to start the gui
         try:
             # this will start our gui
-            startUI(indexer)
+            startUI()
         except Exception:
             # ask the user if they want a terminal session
             result = input("The user interface failed to load. Run in temrinal? [y/n] ")
             # if yes, start a terminal session
             if (result.lower() == "y" or result.lower() == "yes"):
-                startTerminal(indexer)
+                startTerminal()
             else:
                 # otherwise, end the program
                 sys.exit(10)
@@ -120,7 +111,9 @@ def printHelp():
     print("\t{}: Prints this message.".format(help_argument))
 
 
-def startTerminal(indexer: Index):
+def startTerminal():
+    # load or build our index
+    indexer = checkIndex()
     # tell the user how to stop the program
     print("To exit, press ENTER with no search term.")
     # loop forever asking the user for search terms
@@ -135,7 +128,9 @@ def startTerminal(indexer: Index):
             search(indexer, searchTerm)
 
 
-def startUI(indexer: Index):
+def startUI():
+    # load or build our index
+    indexer = checkIndex()
     # import our gui code only when we need it
     from whooshPowersGui import WhooshGui
     # create an application
