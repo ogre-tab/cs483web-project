@@ -59,7 +59,7 @@ def main():
         # create our url to pull data from
         url = "http://powerlisting.wikia.com/api/v1/Articles/AsSimpleJson?id={}".format(power_id)
         # get the power json and add the power to the dictionary
-        powers[power_name] = json.loads(urlopen(url).read())["sections"]
+        powers[power_name] = json.loads(urlopen(url).read().decode("utf-8"))["sections"]
         # update the count
         count = count + 1
         # update the progress
