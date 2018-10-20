@@ -5,6 +5,8 @@ import time
 from datetime import timedelta
 from urllib.request import urlopen
 
+data_folder = "powerData"
+
 power_list_file = "powerData/powers_list.json"
 
 power_data_file = "powerData/powers_data.json"
@@ -17,6 +19,16 @@ save_indented_power_data = True
 def main():
     # get a start time
     start_time = time.time()
+
+    # check that our data folder exists
+    if (os.path.isdir(data_folder) is False):
+        # try to create the directory
+        try:
+            os.mkdir(data_folder)
+        except Exception as e:
+            # if unable to create the directory, tell the user and exit
+            print("Unable to make data directory.\n{}".format(e))
+            sys.exit(1)
 
     power_list = None
     # if the powers list does not exist, then get the list and save it

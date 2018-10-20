@@ -1,5 +1,9 @@
 import json
+import os
 import sqlite3
+import sys
+
+data_folder = "powerData"
 
 # file names
 power_data_file = "powerData/powers_data.json"
@@ -14,6 +18,16 @@ limitations_search = "limit"
 
 
 def main():
+    # check that our data folder exists
+    if (os.path.isdir(data_folder) is False):
+        # try to create the directory
+        try:
+            os.mkdir(data_folder)
+        except Exception as e:
+            # if unable to create the directory, tell the user and exit
+            print("Unable to make data directory.\n{}".format(e))
+            sys.exit(1)
+
     # load our json from file
     json_data = None
     with open(power_data_file, "r") as f:
