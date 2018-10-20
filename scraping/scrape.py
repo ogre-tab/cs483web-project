@@ -1,7 +1,7 @@
+import json
 import os
 import sys
 import time
-import json
 from datetime import timedelta
 from urllib.request import urlopen
 
@@ -13,13 +13,14 @@ save_power_data = True
 indented_power_data_file = "powerData/indented_powers_data.json"
 save_indented_power_data = True
 
+
 def main():
     # get a start time
     start_time = time.time()
 
     power_list = None
     # if the powers list does not exist, then get the list and save it
-    if (os.path.isfile(power_list_file) == False):
+    if (os.path.isfile(power_list_file) is False):
         print("Getting list of powers...")
         json_data = urlopen("http://powerlisting.wikia.com/api/v1/Articles/List?category=Powers&limit=15000").read()
         # load the powers list from the json data
@@ -58,13 +59,13 @@ def main():
     print()
 
     # save the dictionary as json in a more readable format
-    if (save_indented_power_data == True):
+    if (save_indented_power_data is True):
         print("Writing '{}' file...".format(indented_power_data_file))
         with open(indented_power_data_file, "w") as f:
             json.dump(powers, f, indent=4)
 
     # save the dictionary as json
-    if (save_power_data == True):
+    if (save_power_data is True):
         print("Writing '{}' file...".format(power_data_file))
         with open(power_data_file, "w") as f:
             json.dump(powers, f)
@@ -72,6 +73,7 @@ def main():
     # print the overall time to run
     total_time = time.time() - start_time
     print("Done.\nTotal Time: {}\nPower Count: {}".format(timedelta(seconds=total_time), count))
+
 
 # create a text progress bar
 def print_progress(percent: float):
@@ -90,6 +92,7 @@ def print_progress(percent: float):
     # output the progress bar
     sys.stdout.write("\r{} {:.2f}%  ".format(pbar, percent))
     sys.stdout.flush()
+
 
 if (__name__ == "__main__"):
     main()

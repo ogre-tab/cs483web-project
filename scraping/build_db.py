@@ -1,16 +1,17 @@
-import sqlite3
 import json
+import sqlite3
 
 # file names
 power_data_file = "powerData/powers_data.json"
 db_file = "powerData/powers.db"
 
 # attributes to find
-alias_search = [ "also cal", "also known", "also named"]
+alias_search = ["also cal", "also known", "also named"]
 application_search = "application"
 capabilities_search = "capabilit"
-known_users_search = [ "know users", "known user", "users" ]
+known_users_search = ["know users", "known user", "users"]
 limitations_search = "limit"
+
 
 def main():
     # load our json from file
@@ -68,6 +69,7 @@ def main():
             # insert the row into the database
             insertRow(db_file, name, description, alias, application, capability, user, limitation)
 
+
 # add content to an existing list
 def getContent(content, in_list):
     for c in content:
@@ -78,6 +80,7 @@ def getContent(content, in_list):
         # if the type is text, then just add it to the list
         elif (c["type"] == "paragraph"):
             in_list.append(c["text"])
+
 
 def createDatabase(dbfile: str):
     # database schema:
@@ -98,8 +101,9 @@ def createDatabase(dbfile: str):
     # execute the sql statement
     executeSql(dbfile, sql)
 
+
 # execute some sql and return true on an error
-def executeSql(dbfile: str, sql: str, values = None) -> bool:
+def executeSql(dbfile: str, sql: str, values=None) -> bool:
     # a place to store the connection object
     conn = None
     # did the command return an error
@@ -111,7 +115,7 @@ def executeSql(dbfile: str, sql: str, values = None) -> bool:
         # create a cursor
         cur = conn.cursor()
         # check if there are any values to use and execute the sql
-        if (values == None):
+        if (values is None):
             cur.execute(sql)
         else:
             cur.execute(sql, values)
@@ -124,14 +128,15 @@ def executeSql(dbfile: str, sql: str, values = None) -> bool:
         result = False
     finally:
         # close the connection
-        if (conn != None):
+        if (conn is not None):
             conn.close()
     # return the error value
     return result
 
+
 # insert or replace a row in our database
 def insertRow(dbfile: str, name: str, description: str, alias: list, application: list,
-                           capability: list, user: list, limitation: list):
+              capability: list, user: list, limitation: list):
     # our database's column names
     columns = "name, description, alias, application, capability, user, limitation"
     # the sql statement we will execute
@@ -140,6 +145,7 @@ def insertRow(dbfile: str, name: str, description: str, alias: list, application
     values = (name, description, listToCsv(alias), listToCsv(application),
               listToCsv(capability), listToCsv(user), listToCsv(limitation))
     executeSql(dbfile, sql, values)
+
 
 # convert a list to a csv style string
 def listToCsv(in_list: list) -> str:
@@ -150,6 +156,7 @@ def listToCsv(in_list: list) -> str:
         else:
             s = '{},"{}"'.format(s, item)
     return s
+
 
 if (__name__ == "__main__"):
     main()
