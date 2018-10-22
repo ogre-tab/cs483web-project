@@ -15,10 +15,6 @@ index_directory_name = "whooshIndex"
 help_argument = "--help"
 gui_argument = "--gui"
 
-# TODO:
-# clean up gui
-
-
 def main():
     # register signal handler for sigint
     signal.signal(signal.SIGINT, sigint_handler)
@@ -41,7 +37,7 @@ def main():
                 startTerminal()
             else:
                 # otherwise, end the program
-                sys.exit(10)
+                return
     # check for our help flag
     elif (help_argument in sys.argv):
         printHelp()
@@ -161,9 +157,9 @@ def search(indexer, searchTerm):
         # search our index with our query
         results = searcher.search(query)
         # display the results
-        print("\n====== Results for '{}'\n".format(searchTerm))
+        print("====== Results for '{}'".format(searchTerm))
         for line in results:
-            print("{}:\n{}\n".format(line["name"], line["description"]))
+            print("{}: {}".format(line["name"], line["description"]))
         print("====== Total results: " + str(len(results)))
 
 
