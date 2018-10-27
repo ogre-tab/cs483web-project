@@ -12,8 +12,20 @@ To run:
 Clone the repository.
 
 Navigate to the 'scraping' directory.
-Run 'scrape.py' followed by 'build_db.py'.
+if python 3 AND python 2 are installed, replace python with python3 below.
+
+Execute the following command to scrape the data:
+python scrape.py
+
+Execute the following command to build the database:
+python build_db.py
 
 Navigate to the 'indexing' directory.
-Run 'whooshPowers.py' to start the indexer.
-For a simple user interface, run 'whooshPowers.py --gui'.
+Execute the following command to start a terminal session:
+python whooshPowers.py
+
+Execute the following command to start a simple user interface:
+python whooshPowers.py --gui
+
+Execute the following command to show the help:
+python whooshPowers.py --help
