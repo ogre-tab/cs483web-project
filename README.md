@@ -11,9 +11,9 @@ sqlite3
 To run:
 Clone the repository.
 
-Navigate to the 'scraping' directory.
-if python 3 AND python 2 are installed, replace python with python3 below.
+If python 3 AND python 2 are installed, replace python with python3 below.
 
+Navigate to the 'scraping' directory.
 Execute the following command to scrape the data:
 python scrape.py
 
