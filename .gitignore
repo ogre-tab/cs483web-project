@@ -1,6 +1,14 @@
+# project specific ignores
 whooshIndex
 powerData
 
+# python ignores
 __pycache__
 
+# vs code ignores
 .vscode
+
+# apple specific ignores
+.DS_Store
+.AppleDouble
+._*
