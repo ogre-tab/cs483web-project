@@ -15,7 +15,6 @@ index_directory_name = "whooshIndex"
 help_argument = "--help"
 gui_argument = "--gui"
 
-
 def main():
     # register signal handler for sigint
     signal.signal(signal.SIGINT, sigint_handler)
@@ -111,11 +110,12 @@ def printHelp():
 def startTerminal():
     # load or build our index
     indexer = checkIndex()
+    # tell the user how to stop the program
+    print("To exit, press ENTER with no search term.")
     # loop forever asking the user for search terms
     runTerminal = True
     while (runTerminal is True):
-        # tell the user how to stop the program and get a search term
-        searchTerm = input("To exit, press ENTER with no search term.\nEnter a search term: ")
+        searchTerm = input("Enter a search term: ")
         # if the search term is blank, then stop the loop
         if (searchTerm == ""):
             runTerminal = False
@@ -140,7 +140,6 @@ def startUI():
 
 
 # handles ctrl+c (SIGINT)
-# this won't work if input() is blocking while waiting for user input
 def sigint_handler(sig, frame):
     try:
         # try to exit
@@ -152,18 +151,21 @@ def sigint_handler(sig, frame):
 
 def search(indexer, searchTerm):
     # NOTE: can add a different weighting system by adding the term to the searcher(weighting.here())
+    name=list()
+    description = list()
     with indexer.searcher() as searcher:
-        # our attributes to search in
-        columns = ["name", "description", "alias", "application", "capability", "user", "limitation"]
         # create our query
-        query = MultifieldParser(columns, schema=indexer.schema).parse(searchTerm)
+        query = MultifieldParser(["name", "description"], schema=indexer.schema).parse(searchTerm)
         # search our index with our query
         results = searcher.search(query)
         # display the results
         print("====== Results for '{}'".format(searchTerm))
         for line in results:
             print("{}: {}".format(line["name"], line["description"]))
+            name.append(line['name'])
+            description.append(line['description'])
         print("====== Total results: " + str(len(results)))
+        return name, description
 
 
 def loadIndex():

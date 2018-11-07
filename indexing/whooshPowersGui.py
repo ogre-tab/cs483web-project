@@ -33,7 +33,7 @@ class WhooshGui(QWidget):
         # NOTE: can add a different weighting system by adding the term to the searcher(weighting.here())
         with self.indexer.searcher() as searcher:
             # create our query that will be sent to the sercher
-            query = MultifieldParser(self.columns[:-1], schema=self.indexer.schema).parse(searchTerm)
+            query = MultifieldParser(self.columns, schema=self.indexer.schema).parse(searchTerm)
             # create a searcher with our query
             temp_results = searcher.search(query)
             # clear our list box
@@ -90,79 +90,45 @@ class WhooshGui(QWidget):
         grid.setSpacing(4)
         # set our window's layout
         self.setLayout(grid)
-
         # connect a click event to our list box
         self.resultsList.itemSelectionChanged.connect(self.resultChanged)
-        # change some properties of our list box
-        self.resultsList.setFixedWidth(256)
-        self.resultsList.setFixedHeight(177)
-
         # our text boxes will uses these values
         rowSpan = 1
-        columnSpan = 4
+        columnSpan = 2
 
         # add row 0 widgets, a text box and a button
         self.searchLineEdit = QLineEdit()
         self.searchLineEdit.setFixedHeight(32)
         self.searchLineEdit.returnPressed.connect(self.searchButtonClicked)
-        grid.addWidget(self.searchLineEdit, 0, 0, 1, 4)
+        grid.addWidget(self.searchLineEdit, 0, 0, rowSpan, columnSpan)
 
         searchPushButton = QPushButton("Search")
         searchPushButton.setFixedHeight(32)
         searchPushButton.setFixedWidth(64)
         searchPushButton.clicked.connect(self.searchButtonClicked)
-        grid.addWidget(searchPushButton, 0, 4)
+        grid.addWidget(searchPushButton, 0, 2)
 
         # add row 1 widgets, our results count label
         self.resultsCountLabel = self.createLabel("Results: 0")
-        grid.addWidget(self.resultsCountLabel, 1, 0)
+        grid.addWidget(self.resultsCountLabel, 1, 0, 1, 2)
 
         # add row 2 widgets, our list box
-        grid.addWidget(self.resultsList, 2, 0, 4, 3)
+        grid.addWidget(self.resultsList, 2, 0, 1, 3)
 
-        # name text box label
-        grid.addWidget(self.createLabel("Name"), 1, 3)
-
-        # add name row next to the list box
-        textEdit = self.createTextEdit(False)
-        textEdit.setFixedWidth(256)
-        grid.addWidget(textEdit, 2, 3, 1, 2)
-        self.widgetDict["name"] = textEdit
-
-        # description text box label
-        grid.addWidget(self.createLabel("Description"), 3, 3)
-
-        # add description row next to the list box
-        textEdit = self.createTextEdit(True)
-        textEdit.setFixedWidth(256)
-        textEdit.setFixedHeight(123)
-        grid.addWidget(textEdit, 4, 3, 1, 2)
-        self.widgetDict["description"] = textEdit
-
-        # add row 6 through 10 widgets, the other text boxes
-        rowCount = 6
-        for col in self.columns[2:]:
+        # add row 3 through 10 widgets, the other text boxes
+        rowCount = 3
+        for col in self.columns:
             self.createRow(grid, col, rowCount, rowSpan, columnSpan)
             rowCount = rowCount + 1
 
-        self.widgetDict["path"].setFixedHeight(32)
-
         # set this window's title
-        if (self.indexer is None):
-            self.setWindowTitle("Powers Index -- NO INDEX")
-        else:
-            self.setWindowTitle("Powers Index")
-
-        # fix the window's size
-        self.setFixedHeight(611)
-        self.setFixedWidth(538)
+        self.setWindowTitle("Powers Index")
 
     def createRow(self, grid: QGridLayout, text: str, row: int, rowSpan: int, columnSpan: int):
         # add a label to our window for this row
         grid.addWidget(self.createLabel(text.title()), row, 0)
         # create a read only text box
         textEdit = self.createTextEdit(True)
-        textEdit.setFixedHeight(60)
         # add the text box to this row
         grid.addWidget(textEdit, row, 1, rowSpan, columnSpan)
         # store the widget in our dictionary for use later
@@ -178,7 +144,7 @@ class WhooshGui(QWidget):
     def createLabel(self, text: str) -> QLabel:
         # create a label and set some properties
         label = QLabel(text)
-        # label.setFixedHeight(16)
+        label.setFixedHeight(32)
         label.setFixedWidth(64)
         return label
 
