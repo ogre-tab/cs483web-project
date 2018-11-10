@@ -9,11 +9,12 @@ from whoosh.fields import ID, TEXT, Schema
 from whoosh.index import Index, create_in, exists_in, open_dir
 from whoosh.qparser import MultifieldParser
 
-db_file = "../scraping/powerData/powers.db"
-index_directory_name = "whooshIndex"
+db_file = os.path.join(os.getcwd(), "scraping/powerData/powers.db")
+index_directory_name = os.path.join(os.getcwd(), "scraping/whooshIndex")
 
 help_argument = "--help"
 gui_argument = "--gui"
+
 
 def main():
     # register signal handler for sigint
@@ -46,7 +47,7 @@ def main():
         printHelp()
 
 
-def checkIndex() -> Index:
+def checkAndLoadIndex() -> Index:
     # check if our index directory exists
     if (os.path.isdir(index_directory_name) is False):
         try:
@@ -64,7 +65,7 @@ def checkIndex() -> Index:
             # our index is invalid, so create our index and return it
             return createNewIndex()
         # try to load the index
-        indexer = loadIndex()
+        indexer = loadIndexFromDisk()
         # check if the index was loaded
         if (indexer is None):
             # build and return the index because the index didn't load
@@ -109,13 +110,12 @@ def printHelp():
 
 def startTerminal():
     # load or build our index
-    indexer = checkIndex()
-    # tell the user how to stop the program
-    print("To exit, press ENTER with no search term.")
+    indexer = checkAndLoadIndex()
     # loop forever asking the user for search terms
     runTerminal = True
     while (runTerminal is True):
-        searchTerm = input("Enter a search term: ")
+        # tell the user how to stop the program and get a search term
+        searchTerm = input("To exit, press ENTER with no search term.\nEnter a search term: ")
         # if the search term is blank, then stop the loop
         if (searchTerm == ""):
             runTerminal = False
@@ -126,7 +126,7 @@ def startTerminal():
 
 def startUI():
     # load or build our index
-    indexer = checkIndex()
+    indexer = checkAndLoadIndex()
     # import our gui code only when we need it
     from whooshPowersGui import WhooshGui
     # create an application
@@ -140,6 +140,7 @@ def startUI():
 
 
 # handles ctrl+c (SIGINT)
+# this won't work if input() is blocking while waiting for user input
 def sigint_handler(sig, frame):
     try:
         # try to exit
@@ -150,26 +151,31 @@ def sigint_handler(sig, frame):
 
 
 def search(indexer, searchTerm):
-    # NOTE: can add a different weighting system by adding the term to the searcher(weighting.here())
-    name=list()
+    # lists of values to return
+    name = list()
     description = list()
+    # NOTE: can add a different weighting system by adding the term to the searcher(weighting.here())
     with indexer.searcher() as searcher:
+        # our attributes to search in
+        columns = ["name", "description", "alias", "application", "capability", "user", "limitation"]
         # create our query
-        query = MultifieldParser(["name", "description"], schema=indexer.schema).parse(searchTerm)
+        query = MultifieldParser(columns, schema=indexer.schema).parse(searchTerm)
         # search our index with our query
         results = searcher.search(query)
         # display the results
         print("====== Results for '{}'".format(searchTerm))
         for line in results:
             print("{}: {}".format(line["name"], line["description"]))
-            name.append(line['name'])
-            description.append(line['description'])
-        print("====== Total results: " + str(len(results)))
-        return name, description
+            name.append(line["name"])
+            description.append(line["description"])
+        print("====== Total results: {}".format(str(len(results))))
+    # return the lists we created from the search results
+    return name, description
 
 
-def loadIndex():
-    # try to load our index
+# don't call this method directly, call checkAndLoadIndex() instead
+def loadIndexFromDisk():
+    # try to load our index from disk
     try:
         # create the schema for our index
         schema = Schema(name=TEXT(stored=True),
