@@ -154,6 +154,11 @@ def search(indexer, searchTerm):
     # lists of values to return
     name = list()
     description = list()
+    alias = list()
+    application=list()
+    capability=list()
+    user=list()
+    limitation=list()
     # NOTE: can add a different weighting system by adding the term to the searcher(weighting.here())
     with indexer.searcher() as searcher:
         # our attributes to search in
@@ -165,12 +170,17 @@ def search(indexer, searchTerm):
         # display the results
         print("====== Results for '{}'".format(searchTerm))
         for line in results:
-            print("{}: {}".format(line["name"], line["description"]))
+            print("{}: {}".format(line["name"], line["description"],))
             name.append(line["name"])
             description.append(line["description"])
+            alias.append(line["alias"])
+            application.append(line["application"])
+            capability.append(line["capability"])
+            user.append(line["user"])
+            limitation.append(line["limitation"])
         print("====== Total results: {}".format(str(len(results))))
     # return the lists we created from the search results
-    return name, description
+    return name, description, alias, application, capability, user, limitation 
 
 
 # don't call this method directly, call checkAndLoadIndex() instead
