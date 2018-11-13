@@ -2,7 +2,7 @@ import os
 
 from flask import Flask, render_template, request
 
-from indexing.whooshPowers import search, checkAndLoadIndex
+from indexing.whooshPowers import checkAndLoadIndex, search
 
 # template file names
 home_page = "welcome_page.html"
@@ -36,14 +36,12 @@ def results():
         data = request.args
 
     keywordquery = data.get('searchterm')
-    test = data.get('test')
 
     print('Keyword Query is: ' + keywordquery)
-    print('Test Query is: ' + test)
 
-    name, description, alias, application, capability, user,  limitation = search(indexr, keywordquery)
+    search_results = search(indexr, keywordquery)
 
-    return render_template(results_page, query=keywordquery, results=zip(name, description, alias, application, capability, user, limitation))
+    return render_template(results_page, query=keywordquery, results=search_results)
 
 
 if __name__ == '__main__':
