@@ -34,14 +34,14 @@ table, th, td {
 th {
     text-align: left;
     height: 100px;
-    background: #93ded0;
-    color: #ff9068;
+    background: #ffffff;
+    color: #000000;
 }
 
 td {
     text-align: left;
-    background: #5c5590;
-    color: #e98eff;
+    background: #ffffff;
+    color: #000000;
 }
 
 .blueText{
