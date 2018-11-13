@@ -4,7 +4,6 @@ import signal
 import sqlite3
 import sys
 
-from PyQt5.QtWidgets import QApplication
 from whoosh.fields import ID, TEXT, Schema
 from whoosh.index import Index, create_in, exists_in, open_dir
 from whoosh.qparser import MultifieldParser
@@ -14,6 +13,24 @@ index_directory_name = os.path.join(os.getcwd(), "scraping/whooshIndex")
 
 help_argument = "--help"
 gui_argument = "--gui"
+
+
+# simple class to store data about a power
+class PowerData:
+    def __init__(self, name, description, alias, application, capability, user, limitation):
+        self.name = name
+        self.description = description
+        self.alias = alias
+        self.application = application
+        self.capability = capability
+        self.user = user
+        self.limitation = limitation
+
+    def __repr__(self):
+        return self.name
+
+    def __str__(self):
+        return "{}: {}".format(self.name, self.description)
 
 
 def main():
@@ -128,6 +145,7 @@ def startUI():
     # load or build our index
     indexer = checkAndLoadIndex()
     # import our gui code only when we need it
+    from PyQt5.QtWidgets import QApplication
     from whooshPowersGui import WhooshGui
     # create an application
     app = QApplication(sys.argv)
@@ -151,9 +169,8 @@ def sigint_handler(sig, frame):
 
 
 def search(indexer, searchTerm):
-    # lists of values to return
-    name = list()
-    description = list()
+    # list of tuples containing our search results
+    search_results = []
     # NOTE: can add a different weighting system by adding the term to the searcher(weighting.here())
     with indexer.searcher() as searcher:
         # our attributes to search in
@@ -165,12 +182,15 @@ def search(indexer, searchTerm):
         # display the results
         print("====== Results for '{}'".format(searchTerm))
         for line in results:
-            print("{}: {}".format(line["name"], line["description"]))
-            name.append(line["name"])
-            description.append(line["description"])
+            print("{}: {}".format(line["name"], line["description"],))
+            # create a powerdata object from our search data and add to our list
+            search_results.append(PowerData(name=line["name"], description=line["description"],
+                                            alias=line["alias"], application=line["application"],
+                                            capability=line["capability"], user=line["user"],
+                                            limitation=line["limitation"]))
         print("====== Total results: {}".format(str(len(results))))
-    # return the lists we created from the search results
-    return name, description
+    # return the data we got from the search results
+    return search_results
 
 
 # don't call this method directly, call checkAndLoadIndex() instead

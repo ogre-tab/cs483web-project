@@ -3,27 +3,34 @@
 	<head>
 		<meta charset="UTF-8">
 		<link rel="stylesheet" href= "{{ url_for('static',filename='styles/main.css') }}">
-		<title>Results</title>
+		<title>Super Search: Results</title>
 	</head>
-
 	<body>
-
 		<h2>
 			<div id='redText'>You</div> <div class='blueText'>searched</div> for: {{query}}
 		</h2>
-		
 		<table>
 			<thead>
 				<tr>
 					<th>Title</th>
 					<th>Description</th>
+					<th>Alias</th>
+					<th>Application</th>
+					<th>Capability</th>
+					<th>User</th>
+					<th>Limitation</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for t, d in results %}
+				{% for power in results %}
 				<tr>
-					<td>{{t}}</td>
-					<td>{{d}}</td>
+					<td>{{power.name}}</td>
+					<td>{{power.description}}</td>
+					<td>{{power.alias}}</td>
+					<td>{{power.application}}</td>
+					<td>{{power.capability}}</td>
+					<td>{{power.user}}</td>
+					<td>{{power.limitation}}</td>
 				</tr>
 				{% endfor %}
 			</tbody>

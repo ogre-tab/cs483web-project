@@ -2,8 +2,10 @@
 whooshIndex
 powerData
 
-# python ignores
-__pycache__
+# python ignores -- Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
 # vs code ignores
 .vscode
