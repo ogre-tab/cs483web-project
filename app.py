@@ -41,9 +41,9 @@ def results():
     print('Keyword Query is: ' + keywordquery)
     print('Test Query is: ' + test)
 
-    name, description = search(indexr, keywordquery)
+    name, description, alias, application, capability, user,  limitation = search(indexr, keywordquery)
 
-    return render_template(results_page, query=keywordquery, results=zip(name, description))
+    return render_template(results_page, query=keywordquery, results=zip(name, description, alias, application, capability, user, limitation))
 
 
 if __name__ == '__main__':

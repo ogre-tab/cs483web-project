@@ -17,13 +17,24 @@
 				<tr>
 					<th>Title</th>
 					<th>Description</th>
+					<th>Alias</th>
+					<th>Application</th>
+					<th>Capability</th>
+					<th>User</th>
+					<th>Limitation</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for t, d in results %}
+				{% for t, d, alias, application, cap, user, limitation in results %}
 				<tr>
 					<td>{{t}}</td>
 					<td>{{d}}</td>
+					<td>{{alias}}</td>
+					<td>{{application}}</td>
+					<td>{{cap}}</td>
+					<td>{{user}}</td>
+					<td>{{limitation}}</td>
+
 				</tr>
 				{% endfor %}
 			</tbody>
