@@ -2,11 +2,158 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<link rel="stylesheet" href= "{{ url_for('static',filename='styles/main.css') }}">
+		
 		<title>Super Search: Results</title>
-	</head>
-	<body>
-		<h2>
+        <style>
+            .item1 { 
+                grid-area: header;
+                background-color: rgba(255, 223, 0,1);
+                border-style: solid;
+                border-color: black;
+            }
+            .item2 { 
+                grid-area: menu;
+                background-color: rgba(0, 176, 240,1);
+                border-style: solid;
+                border-color: black;
+            }
+            .item3 { 
+                grid-area: main;
+                background-color: rgba(196, 47, 26,1);
+                border-style: solid;
+                border-color: black;
+            }
+            .item4 { grid-area: right; }
+            .item5 { grid-area: footer; }
+
+            .grid-container {
+                display: grid;
+                grid-template-areas:
+                    'header header header header header header'
+                    'menu main main main main main'
+                    'menu main main main main main'
+                    'menu main main main main main'
+                    'menu main main main main main';
+                grid-gap: 10px;
+                background-color: #ffffff;
+ 
+            }
+            .grid-container > div {
+                text-align: center;
+                font-size: 30px;
+            }
+    
+            .item3{
+                display: grid;
+                grid-template-areas:
+                    'pic pic pic name name name name'
+                    'pic pic pic desc desc desc desc'
+                    'pic pic pic desc desc desc desc'
+                    'ali ali ali user user some some'
+                    'ali ali ali user user some some';
+                grid-gap: 15px;
+                padding: 15px;
+            }
+            .picture{
+                grid-area: pic;
+                background-color: rgba(255, 255, 255,1);
+                border-style: solid;
+                border-color: black;
+    
+            }
+            .power{
+                grid-area: name;
+                background-color: rgba(255, 255, 255,1);
+                border-style: solid;
+                border-color: black;
+            }
+            .description{
+                grid-area: desc;
+                background-color: rgba(255, 255, 255,1);
+                border-style: solid;
+                border-color: black;
+    
+            }
+            .alias{
+                grid-area: ali;
+                background-color: rgba(255, 255, 255,1);
+                border-style: solid;
+                border-color: black;
+    
+            }
+            .users{
+                grid-area: user;
+                background-color: rgba(255, 255, 255,1);
+                border-style: solid;
+                border-color: black;
+    
+            }
+            .something{
+                grid-area: some;
+                background-color: rgba(255, 255, 255,1);
+                border-style: solid;
+                border-color: black;
+    
+            }
+            html {
+                height: 100%;
+            }
+            .grid-container{
+                min-height: 100%;
+            }
+            ul#menu li {
+                display:inline;
+                font-size: 12pt;
+            }
+        </style>
+</head>
+        
+    
+    
+    
+    
+	<body class ="grid-container">
+        <!--<div class="grid-container">-->
+            <div class="item1">
+               <ul id="menu">
+                   <li>Enhancements</li>
+                   <li>Mental Powers</li>
+                   <li>Personal Powers</li>
+                   <li>Mimicry</li>
+                   <li>Manipulations</li>
+                   <li>Almighty Powers</li>
+                   <li>
+                       <form method="get" action="{{ url_for('results') }}">
+                            <input type="text" name="searchterm"><br />
+                            <button type="submit" value="Search">Submit</button>
+                        </form>
+                   
+                   </li>
+                </ul>   
+            </div>
+            <div class="item2"> 
+                <table>
+                    <tbody>
+                        {% for power in results %}
+                        <tr>
+                            <td><a href="">{{power.name}}</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    
+                </table>
+            </div>
+            <div class="item3">    
+                <div class="picture"><img src ="https://allinonebusiness-services.co.uk/wp-content/uploads/2015/11/hero-small.png" alt="There should be a picture here"></div>
+                <div class="power">{{results[0].name}}</div>
+                <div class="description">{{results[0].description}} {{results[0].capability}}</div>
+                <div class="alias">{{results[0].alias}}</div>
+                <div class="users">{{results[0].user}}</div>
+                <div class="something">{{results[0].limitation}}</div>
+            </div>  
+        <!--</div>-->
+        <!-- keeping below for easy reference-->
+	<!--	<h2>
 			<div id='redText'>You</div> <div class='blueText'>searched</div> for: {{query}}
 		</h2>
 		<table>
@@ -37,6 +184,6 @@
 		</table>
 		<form method="post" action="{{ url_for('index') }}">
 			<input type="submit" value="Return" />
-		</form>	
+		</form>	-->
 	</body>	
 </html>
