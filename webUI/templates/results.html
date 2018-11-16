@@ -17,7 +17,7 @@
                 border-style: solid;
                 border-color: black;
             }
-            .item3 { 
+            .power_view { 
                 grid-area: main;
                 background-color: rgba(196, 47, 26,1);
                 border-style: solid;
@@ -43,7 +43,7 @@
                 font-size: 30px;
             }
     
-            .item3{
+            .power_view{
                 display: grid;
                 grid-template-areas:
                     'pic pic pic name name name name'
@@ -136,20 +136,17 @@
                     <tbody>
                         {% for power in results %}
                         <tr>
-                            <td><a href="">{{power.name}}</a></td>
+                            <td><a onclick="getPowerView('{{power.name|safe}}')" href="javascript:void(0);">{{power.name}}</a></td>
                         </tr>
                         {% endfor %}
                     </tbody>
                     
                 </table>
             </div>
-            <div class="item3">    
-                <div class="picture"><img src ="https://allinonebusiness-services.co.uk/wp-content/uploads/2015/11/hero-small.png" alt="There should be a picture here"></div>
-                <div class="power">{{results[0].name}}</div>
-                <div class="description">{{results[0].description}} {{results[0].capability}}</div>
-                <div class="alias">{{results[0].alias}}</div>
-                <div class="users">{{results[0].user}}</div>
-                <div class="something">{{results[0].limitation}}</div>
+            <div class="power_view" id="power-view">   
+                <!-- MAIN POWER VIEW-->
+                {{power_view|safe}}
+                
             </div>  
         <!--</div>-->
         <!-- keeping below for easy reference-->
@@ -185,5 +182,25 @@
 		<form method="post" action="{{ url_for('index') }}">
 			<input type="submit" value="Return" />
 		</form>	-->
-	</body>	
+    </body>	
+    <script type="text/javascript">
+        //var power_name = "Telekinesis" /* example */
+        
+        /* accepts power name by exact title match or error */
+        function getPowerView(power_name){
+            var power_data
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    power_data = this.responseText;      
+                    console.log("retrieved data for " + power_name);
+                    //console.log(power_data)
+                    document.getElementById("power-view").innerHTML = power_data;
+                }
+            };
+            xmlhttp.open("GET", "power/"+power_name, true);
+            xmlhttp.send();
+        }
+        
+    </script>
 </html>
