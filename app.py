@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template, request
+from flask import jsonify
 
 from indexing.whooshPowers import checkAndLoadIndex, search
 
@@ -51,6 +52,12 @@ def power_page(page):
     
     #i want this to populate the main frame
     return render_template(results_page, query="", results=[powerpage]) 
+
+
+@app.route('/data/<power>')
+def getPowerData(power):
+    pow = browse.getPowerData(power).asDict()
+    return jsonify(pow)
 
 if __name__ == '__main__':
     global indexr
