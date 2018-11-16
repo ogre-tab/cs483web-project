@@ -35,8 +35,17 @@ def main():
 
     # create the database file
     createDatabase(db_file)
-
+    
+    #variables for progress report
+    progress_check = 0
+    progress_total = len(json_data)
+    
     for item in json_data:
+        # progress report 
+        if progress_check % 10 == 0:
+            print(f"Building Database: {round(progress_check*100/progress_total,1)}%", end="                                     \r")
+        progress_check += 1
+        
         # the attributes we want to save
         name = ""
         description = ""

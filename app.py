@@ -1,8 +1,10 @@
 import os
-
 from flask import Flask, render_template, request
+from flask import jsonify
 
 from indexing.whooshPowers import checkAndLoadIndex, search
+
+import browse
 
 # template file names
 home_page = "welcome_page.html"
@@ -34,18 +36,31 @@ def results():
         data = request.form
     else:
         data = request.args
-
+    
     keywordquery = data.get('searchterm')
-
+    
     print('Keyword Query is: ' + keywordquery)
-
+    
     search_results = search(indexr, keywordquery)
-
+    
     return render_template(results_page, query=keywordquery, results=search_results)
 
+@app.route('/power/<page>')
+def power_page(page):
+    print(f'Loading info for "{page}""')
+    powerpage = browse.getPowerData(page)
+    
+    #i want this to populate the main frame
+    return render_template(results_page, query="", results=[powerpage]) 
+
+
+@app.route('/data/<power>')
+def getPowerData(power):
+    pow = browse.getPowerData(power).asDict()
+    return jsonify(pow)
 
 if __name__ == '__main__':
     global indexr
-
+    
     indexr = checkAndLoadIndex()
     app.run(debug=True)
