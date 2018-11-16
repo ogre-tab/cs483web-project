@@ -12,6 +12,10 @@ def getChildPowersOf(power):
 def getParentPowersOf(power):
 	return None 
 
+#find power by exact index match
+def getPowerData(power):
+	return wp.getPower(power)
+
 def tester():
 	powername = "Flight"
 	print(f"getting entry of power {powername}")
