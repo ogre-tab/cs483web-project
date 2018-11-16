@@ -1,7 +1,35 @@
 <div class="picture"><img src ="https://allinonebusiness-services.co.uk/wp-content/uploads/2015/11/hero-small.png" alt="There should be a picture here"></div>
-<div class="power">{{power.name|safe}}</div>
-<div class="description">{{power.description|safe}} {{power.capability|safe}}</div>
-<div class="alias">{{power.alias|safe}}</div>
+<div class="power"><h1>{{power.name|safe}}</h1></div>
+<div class="description"><div><em>{{power.description|safe}}</em></div> <div>
+		<table>
+				<tbody>
+					{% for item in power.asDict().get('capability') %}
+					<tr>
+						<td>{{item|safe}}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+		</table></div>
+	</div>
+<div class="alias"><h2>Also known as:</h2>
+		<table>
+				<tbody>
+					{% for item in power.asDict().get('alias') %}
+					<tr>
+						<td>{{item|safe}}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+		</table></div>
 <div class="users">{{power.user|safe}}</div>
-<div class="something">{{power.limitation|safe}}</div>
+<div class="something"><h2>Limitations / Counter-abilities:</h2>
+		<table>
+				<tbody>
+					{% for item in power.asDict().get('limitation') %}
+					<tr>
+						<td>{{item|safe}}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+		</table></div>
 				
