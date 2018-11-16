@@ -31,27 +31,6 @@ class PowerData:
 
     def __str__(self):
         return "{}: {}".format(self.name, self.description)
-    
-    def printAll(self):
-        return f"{self.name}, {self.description}"
-
-# simple class to store data about a power
-class PowerData:
-    def __init__(self, name, description, alias, application, capability, user, limitation):
-        self.name = name
-        self.description = description
-        self.alias = alias
-        self.application = application
-        self.capability = capability
-        self.user = user
-        self.limitation = limitation
-
-    def __repr__(self):
-        return self.name
-
-    def __str__(self):
-        return "{}: {}".format(self.name, self.description)
-
 
 def main():
     # register signal handler for sigint
