@@ -16,8 +16,6 @@ def getParentPowersOf(power):
 def getPowerData(power):
 	return wp.getPower(power)
 
-def tester():
-	powername = "Flight"
-	print(f"getting entry of power {powername}")
-	wp.getPower(powername).printAll()
-	
+#get a power data in json form 
+def getPowerJSON(power):
+	print(f"getting data of {power}")
