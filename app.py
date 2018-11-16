@@ -9,6 +9,7 @@ import browse
 # template file names
 home_page = "welcome_page.html"
 results_page = "results.html"
+power_frame = "power_div.html"
 
 # create our flask object
 app = Flask(__name__)
@@ -42,8 +43,15 @@ def results():
     print('Keyword Query is: ' + keywordquery)
     
     search_results = search(indexr, keywordquery)
-    
-    return render_template(results_page, query=keywordquery, results=search_results)
+    power_div = render_template(power_frame, power=search_results[0])
+    return render_template(results_page, query=keywordquery, results=search_results, power_view=power_div)
+
+@app.route('/results/power/<power_name>')
+def pop_result(power_name):
+    power_data = browse.getPowerData(power_name)
+    power_div = render_template(power_frame, power=power_data)
+    return power_div
+
 
 @app.route('/power/<page>')
 def power_page(page):
@@ -54,7 +62,7 @@ def power_page(page):
     return render_template(results_page, query="", results=[powerpage]) 
 
 
-@app.route('/data/<power>')
+@app.route('/results/data/<power>')
 def getPowerData(power):
     pow = browse.getPowerData(power).asDict()
     return jsonify(pow)
