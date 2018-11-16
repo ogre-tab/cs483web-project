@@ -8,12 +8,12 @@ from whoosh.fields import ID, TEXT, Schema
 from whoosh.index import Index, create_in, exists_in, open_dir
 from whoosh.qparser import MultifieldParser
 
+# THESE ONLY WORK WHEN CALLED FROM THE ROOT DIRECTORY
 db_file = os.path.join(os.getcwd(), "scraping/powerData/powers.db")
-index_directory_name = os.path.join(os.getcwd(), "scraping/whooshIndex")
+index_directory_name = os.path.join(os.getcwd(),"scraping/whooshIndex")
 
 help_argument = "--help"
 gui_argument = "--gui"
-
 
 # simple class to store data about a power
 class PowerData:
@@ -31,7 +31,9 @@ class PowerData:
 
     def __str__(self):
         return "{}: {}".format(self.name, self.description)
-
+    
+    def printAll(self):
+        return f"{self.name}, {self.description}"
 
 def main():
     # register signal handler for sigint
@@ -62,7 +64,6 @@ def main():
     else:
         # anything else, print the help message
         printHelp()
-
 
 def checkAndLoadIndex() -> Index:
     # check if our index directory exists
@@ -215,7 +216,6 @@ def loadIndexFromDisk():
         # something happened while loading our index, return None
         return None
 
-
 def createNewIndex():
     # create the schema for our index
     schema = Schema(name=TEXT(stored=True),
@@ -229,12 +229,12 @@ def createNewIndex():
     # create the index our specified directory
     print("Building index.")
     indexer = create_in(index_directory_name, schema)
-
+    
     # get all the data from our database to add to the index
     print("Getting data from database...")
     columns = "name, description, alias, application, capability, user, limitation"
     powers = readSqlData(db_file, "SELECT {} FROM powers".format(columns))
-
+    
     # add the database data to the index
     print("Indexing...")
     writer = indexer.writer()
@@ -254,9 +254,11 @@ def createNewIndex():
         if (length > pad):
             pad = length
         # print the current power being added
+        # progress report 
+        progress_check += 1
         sys.stdout.write("\r{}".format(power[0]).ljust(pad))
         sys.stdout.flush()
-
+    
     # commit the changes to the index
     sys.stdout.write("\rCommitting changes...".ljust(pad))
     sys.stdout.write("\n")
@@ -298,8 +300,7 @@ def executeSql(dbfile: str, sql: str, values=None) -> bool:
     # return the error value
     return result
 
-
-# execute some sql and return the data
+# execute some sql and return the data as a list
 def readSqlData(dbfile: str, sql: str, values=None) -> object:
     # a place to store the connection object
     conn = None
@@ -328,6 +329,25 @@ def readSqlData(dbfile: str, sql: str, values=None) -> object:
     # return the error value
     return data
 
+#find index entry with this name, or error
+def getPower(powername):
+    columns = "name, description, alias, application, capability, user, limitation"
+    power_entries = readSqlData(db_file, f"SELECT {columns} FROM powers WHERE name = '{powername}'")
+    if len(power_entries) is 0:        
+        print(f"{powername} is not a valid link to an item in the index")
+        return None
+    if len(power_entries) > 1:
+        print(f"multiple entries exist for powername, returning first")
+    power = power_entries[0]
+    linked_power = PowerData(
+        name=power[0], 
+        description=power[1],                        
+        alias=power[2], 
+        application=power[3],
+        capability=power[4], 
+        user=power[5],
+        limitation=power[6])
+    return linked_power
 
 if __name__ == '__main__':
     main()
