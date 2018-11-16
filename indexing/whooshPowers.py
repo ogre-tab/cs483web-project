@@ -343,7 +343,8 @@ def getPower(powername):
     power_entries = readSqlData(db_file, f"SELECT {columns} FROM powers WHERE name = '{powername}'")
     if len(power_entries) is 0:        
         print(f"{powername} is not a valid link to an item in the index")
-        return None
+        power_entries = [[f"No Entry for {powername}.","","","","","","",""]]
+        #return None #NOT UNTIL WE HANDLE NONE TYPES! BAH
     if len(power_entries) > 1:
         print(f"multiple entries exist for powername, returning first")
     power = power_entries[0]
