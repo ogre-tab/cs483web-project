@@ -37,14 +37,20 @@ def results():
         data = request.form
     else:
         data = request.args
-    
+
     keywordquery = data.get('searchterm')
-    
+
     print('Keyword Query is: ' + keywordquery)
-    
+
     search_results = search(indexr, keywordquery)
-    power_div = render_template(power_frame, power=search_results[0])
+
+    # check if our search results are empty
+    # this fix stops some exceptions, but creates an ugly page
+    power_div = "Term not found."
+    if (len(search_results) >= 1):
+        power_div = render_template(power_frame, power=search_results[0])
     return render_template(results_page, query=keywordquery, results=search_results, power_view=power_div)
+
 
 @app.route('/results/power/<power_name>')
 def pop_result(power_name):
@@ -57,8 +63,8 @@ def pop_result(power_name):
 def power_page(page):
     print(f'Loading info for "{page}""')
     powerpage = browse.getPowerData(page)
-    
-    #i want this to populate the main frame
+
+    # i want this to populate the main frame
     return render_template(results_page, query="", results=[powerpage]) 
 
 
@@ -66,6 +72,7 @@ def power_page(page):
 def getPowerData(power):
     pow = browse.getPowerData(power).asDict()
     return jsonify(pow)
+
 
 if __name__ == '__main__':
     global indexr
