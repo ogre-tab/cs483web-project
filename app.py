@@ -37,11 +37,8 @@ def results():
         data = request.form
     else:
         data = request.args
-
     keywordquery = data.get('searchterm')
-
     print('Keyword Query is: ' + keywordquery)
-
     search_results = search(indexr, keywordquery)
 
     # check if our search results are empty
@@ -65,7 +62,7 @@ def power_page(page):
     powerpage = browse.getPowerData(page)
 
     # i want this to populate the main frame
-    return render_template(results_page, query="", results=[powerpage]) 
+    return render_template(results_page, query="", results=[powerpage])
 
 
 @app.route('/results/data/<power>')
@@ -76,6 +73,6 @@ def getPowerData(power):
 
 if __name__ == '__main__':
     global indexr
-    
+
     indexr = checkAndLoadIndex()
     app.run(debug=True)

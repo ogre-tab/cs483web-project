@@ -1,8 +1,10 @@
+import csv
 import ntpath
 import os
 import signal
 import sqlite3
 import sys
+from io import StringIO
 
 from whoosh.fields import ID, TEXT, Schema
 from whoosh.index import Index, create_in, exists_in, open_dir
@@ -10,10 +12,11 @@ from whoosh.qparser import MultifieldParser
 
 # THESE ONLY WORK WHEN CALLED FROM THE ROOT DIRECTORY
 db_file = os.path.join(os.getcwd(), "scraping/powerData/powers.db")
-index_directory_name = os.path.join(os.getcwd(),"scraping/whooshIndex")
+index_directory_name = os.path.join(os.getcwd(), "scraping/whooshIndex")
 
 help_argument = "--help"
 gui_argument = "--gui"
+
 
 # simple class to store data about a power
 class PowerData:
@@ -31,17 +34,18 @@ class PowerData:
 
     def __str__(self):
         return f"{self.name}: {self.description}"
-    
+
     def asDict(self):
         return {
-            "name": 		self.name,
-            "description":  self.description,
-            "alias" :       self.alias,
-            "application" : self.application,
-            "capability" : 	self.capability,
-            "user" : 		self.user, 
-            "limitation" :	self.limitation, 
+            "name": self.name,
+            "description": self.description,
+            "alias": self.alias,
+            "application": self.application,
+            "capability": self.capability,
+            "user": self.user,
+            "limitation": self.limitation,
         }
+
 
 def main():
     # register signal handler for sigint
@@ -73,6 +77,7 @@ def main():
         # anything else, print the help message
         printHelp()
 
+
 def checkAndLoadIndex() -> Index:
     # check if our index directory exists
     if (os.path.isdir(index_directory_name) is False):
@@ -81,7 +86,7 @@ def checkAndLoadIndex() -> Index:
             os.mkdir(index_directory_name)
         except Exception as e:
             # print an error and exit
-            print("Unable to create index directory '{}':\n{}".format(index_directory_name, e))
+            print(f"Unable to create index directory '{index_directory_name}':\n{e}")
             sys.exit(1)
         # our index directory doesn't exist, so create our index and return it
         return createNewIndex()
@@ -129,9 +134,9 @@ def checkAndLoadIndex() -> Index:
 
 # print how to use our program
 def printHelp():
-    print("Usage: {} [{}, {}]".format(ntpath.basename(sys.argv[0]), help_argument, gui_argument))
-    print("\t{}: Starts a graphical interface.".format(gui_argument))
-    print("\t{}: Prints this message.".format(help_argument))
+    print(f"Usage: {ntpath.basename(sys.argv[0])} [{help_argument}, {gui_argument}]")
+    print(f"\t{gui_argument}: Starts a graphical interface.")
+    print(f"\t{help_argument}: Prints this message.")
 
 
 def startTerminal():
@@ -189,17 +194,37 @@ def search(indexer, searchTerm):
         # search our index with our query
         results = searcher.search(query)
         # display the results
-        print("====== Results for '{}'".format(searchTerm))
+        print(f"====== Results for '{searchTerm}'")
         for line in results:
-            print("{}: {}".format(line["name"], line["description"],))
+            print(f"{line['name']}: {line['description']}")
             # create a powerdata object from our search data and add to our list
+            alias = csvStringToList(line["alias"])
+            user = csvStringToList(line["user"])
+            limitation = csvStringToList(line["limitation"])
             search_results.append(PowerData(name=line["name"], description=line["description"],
-                                            alias=line["alias"], application=line["application"],
-                                            capability=line["capability"], user=line["user"],
-                                            limitation=line["limitation"]))
-        print("====== Total results: {}".format(str(len(results))))
+                                            alias=alias, application=line["application"],
+                                            capability=line["capability"], user=user,
+                                            limitation=limitation))
+        print(f"====== Total results: {str(len(results))}")
     # return the data we got from the search results
     return search_results
+
+
+# convert a string with a csv format into a list
+def csvStringToList(in_str: str) -> list:
+    # create an in memory file
+    str_io = StringIO(in_str)
+    # load the file into the csv reader
+    csv_r = csv.reader(str_io)
+    # get a list from the reader
+    csv_list = list(csv_r)
+    # for some reason the list is wrapped in a list
+    if (len(csv_list) > 0):
+        # check if our list is empty, and return the first element
+        return csv_list[0]
+    else:
+        # otherwise, return an empty list
+        return []
 
 
 # don't call this method directly, call checkAndLoadIndex() instead
@@ -224,6 +249,7 @@ def loadIndexFromDisk():
         # something happened while loading our index, return None
         return None
 
+
 def createNewIndex():
     # create the schema for our index
     schema = Schema(name=TEXT(stored=True),
@@ -237,12 +263,12 @@ def createNewIndex():
     # create the index our specified directory
     print("Building index.")
     indexer = create_in(index_directory_name, schema)
-    
+
     # get all the data from our database to add to the index
     print("Getting data from database...")
     columns = "name, description, alias, application, capability, user, limitation"
-    powers = readSqlData(db_file, "SELECT {} FROM powers".format(columns))
-    
+    powers = readSqlData(db_file, f"SELECT {columns} FROM powers")
+
     # add the database data to the index
     print("Indexing...")
     writer = indexer.writer()
@@ -262,11 +288,11 @@ def createNewIndex():
         if (length > pad):
             pad = length
         # print the current power being added
-        # progress report 
-        progress_check += 1
-        sys.stdout.write("\r{}".format(power[0]).ljust(pad))
+        # progress report -- UNUSED!
+        # progress_check += 1
+        sys.stdout.write(f"\r{power[0]}".ljust(pad))
         sys.stdout.flush()
-    
+
     # commit the changes to the index
     sys.stdout.write("\rCommitting changes...".ljust(pad))
     sys.stdout.write("\n")
@@ -299,7 +325,7 @@ def executeSql(dbfile: str, sql: str, values=None) -> bool:
         # close the database connection
         conn.close()
     except Exception as e:
-        print("There was an error executing the SQL statement:\n{}".format(e))
+        print(f"There was an error executing the SQL statement:\n{e}")
         result = False
     finally:
         # close the connection
@@ -307,6 +333,7 @@ def executeSql(dbfile: str, sql: str, values=None) -> bool:
             conn.close()
     # return the error value
     return result
+
 
 # execute some sql and return the data as a list
 def readSqlData(dbfile: str, sql: str, values=None) -> object:
@@ -328,7 +355,7 @@ def readSqlData(dbfile: str, sql: str, values=None) -> object:
         # close the database connection
         conn.close()
     except Exception as e:
-        print("There was an error executing the SQL statement:\nError: {}".format(e))
+        print("There was an error executing the SQL statement:\nError: {e}")
         data = None
     finally:
         # close the connection
@@ -337,26 +364,28 @@ def readSqlData(dbfile: str, sql: str, values=None) -> object:
     # return the error value
     return data
 
-#find index entry with this name, or error
+
+# find index entry with this name, or error
 def getPower(powername):
     columns = "name, description, alias, application, capability, user, limitation"
     power_entries = readSqlData(db_file, f"SELECT {columns} FROM powers WHERE name = '{powername}'")
-    if len(power_entries) is 0:        
+    if len(power_entries) is 0:
         print(f"{powername} is not a valid link to an item in the index")
-        power_entries = [[f"No Entry for {powername}.","","","","","","",""]]
-        #return None #NOT UNTIL WE HANDLE NONE TYPES! BAH
+        power_entries = [[f"No Entry for {powername}.", "", "", "", "", "", "", ""]]
+        # return None #NOT UNTIL WE HANDLE NONE TYPES! BAH
     if len(power_entries) > 1:
         print(f"multiple entries exist for powername, returning first")
     power = power_entries[0]
     linked_power = PowerData(
-        name=power[0], 
-        description=power[1],                        
-        alias=power[2], 
+        name=power[0],
+        description=power[1],
+        alias=power[2],
         application=power[3],
-        capability=power[4], 
+        capability=power[4],
         user=power[5],
         limitation=power[6])
     return linked_power
+
 
 if __name__ == '__main__':
     main()
