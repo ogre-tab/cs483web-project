@@ -1,35 +1,25 @@
 <div class="picture"><img src ="https://allinonebusiness-services.co.uk/wp-content/uploads/2015/11/hero-small.png" alt="There should be a picture here"></div>
-<div class="power"><h1>{{power.name|safe}}</h1></div>
-<div class="description"><div><em>{{power.description|safe}}</em></div> <div>
-		<table>
-				<tbody>
-					{% for item in power.asDict().get('capability') %}
-					<tr>
-						<td>{{item|safe}}</td>
-					</tr>
-					{% endfor %}
-				</tbody>
-		</table></div>
-	</div>
-<div class="alias"><h2>Also known as:</h2>
-		<table>
-				<tbody>
-					{% for item in power.asDict().get('alias') %}
-					<tr>
-						<td>{{item|safe}}</td>
-					</tr>
-					{% endfor %}
-				</tbody>
-		</table></div>
-<div class="users">{{power.user|safe}}</div>
-<div class="something"><h2>Limitations / Counter-abilities:</h2>
-		<table>
-				<tbody>
-					{% for item in power.asDict().get('limitation') %}
-					<tr>
-						<td>{{item|safe}}</td>
-					</tr>
-					{% endfor %}
-				</tbody>
-		</table></div>
-				
+
+<div class="power">{{power.name|safe}}</div>
+<div class="description">{{power.description|safe}}<br/><br/>{{power.capability}}</div>
+<div class="alias">
+    <ul style="list-style-type:none">
+        {% for value in power.alias  %}
+            <li>{{ value|safe }}</li>
+        {% endfor %}
+    </ul>
+</div>
+<div class="users">
+    <ul style="list-style-type:none">
+        {% for value in power.users %}
+            <li>{{ value|safe }}</li>
+        {% endfor %}
+    </ul>
+</div>
+<div class="something">
+    <ul style="list-style-type:none">
+        {% for value in power.limitation %}
+            <li>{{ value|safe }}</li>
+        {% endfor %}
+    </ul>
+</div>
