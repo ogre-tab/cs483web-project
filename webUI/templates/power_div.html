@@ -1,24 +1,25 @@
 <div class="picture"><img src ="https://allinonebusiness-services.co.uk/wp-content/uploads/2015/11/hero-small.png" alt="There should be a picture here"></div>
-<div class="power">{{power.name}}</div>
-<div class="description">{{power.description}}<br/><br/>{{power.capability}}</div>
+
+<div class="power">{{power.name|safe}}</div>
+<div class="description">{{power.description|safe}}<br/><br/>{{power.capability}}</div>
 <div class="alias">
     <ul style="list-style-type:none">
-        {% for value in power.alias %}
-            <li>{{ value }}</li>
+        {% for value in power.alias  %}
+            <li>{{ value|safe }}</li>
         {% endfor %}
     </ul>
 </div>
 <div class="users">
     <ul style="list-style-type:none">
-        {% for value in power.user %}
-            <li>{{ value }}</li>
+        {% for value in power.users %}
+            <li>{{ value|safe }}</li>
         {% endfor %}
     </ul>
 </div>
 <div class="something">
     <ul style="list-style-type:none">
         {% for value in power.limitation %}
-            <li>{{ value }}</li>
+            <li>{{ value|safe }}</li>
         {% endfor %}
     </ul>
 </div>

@@ -28,6 +28,7 @@ class PowerData:
         self.capability = capability
         self.user = user
         self.limitation = limitation
+        self.path = name.replace(" ", "_")
 
     def __repr__(self):
         return self.name
@@ -36,16 +37,24 @@ class PowerData:
         return f"{self.name}: {self.description}"
 
     def asDict(self):
-        return {
-            "name": self.name,
-            "description": self.description,
-            "alias": self.alias,
-            "application": self.application,
-            "capability": self.capability,
-            "user": self.user,
-            "limitation": self.limitation,
+        d = {
+            "name": 		self.name,
+            "description":  self.description,
+            "alias" :       self.alias, #may cause problems with phrases that intentionally include quote marks...
+            "application" : self.application,
+            "capability" : 	self.capability,
+            "user" : 		self.user, 
+            "limitation" :	self.limitation, 
         }
-
+        if d["user"] is None:
+            d["user"] = []
+        if d["alias"] is None:
+            d["alias"] = []
+        if d["capability"] is None:
+            d["capability"] = []
+        if d["limitation"] is None:
+            d["limitation"] = []
+        return d
 
 def main():
     # register signal handler for sigint
@@ -364,16 +373,20 @@ def readSqlData(dbfile: str, sql: str, values=None) -> object:
     # return the error value
     return data
 
-
-# find index entry with this name, or error
-def getPower(powername):
+#find index entry with this name, or error
+def getPower(powername, nullable=False):
+    #TODO:  MAKE THIS RUN FROM WHOOSH
     columns = "name, description, alias, application, capability, user, limitation"
     power_entries = readSqlData(db_file, f"SELECT {columns} FROM powers WHERE name = '{powername}'")
-    if len(power_entries) is 0:
+    
+    if len(power_entries) is 0:        
         print(f"{powername} is not a valid link to an item in the index")
-        power_entries = [[f"No Entry for {powername}.", "", "", "", "", "", "", ""]]
-        # return None #NOT UNTIL WE HANDLE NONE TYPES! BAH
+        if not nullable:
+            power_entries = [[f"No Entry for {powername}.","","","","","","",""]]
+        else:
+            return None #NOT UNTIL WE HANDLE NONE TYPES! BAH
     if len(power_entries) > 1:
+        #probably shouldn't happen!
         print(f"multiple entries exist for powername, returning first")
     power = power_entries[0]
     linked_power = PowerData(

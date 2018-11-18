@@ -59,10 +59,10 @@ def pop_result(power_name):
 @app.route('/power/<page>')
 def power_page(page):
     print(f'Loading info for "{page}""')
-    powerpage = browse.getPowerData(page)
-
-    # i want this to populate the main frame
-    return render_template(results_page, query="", results=[powerpage])
+    
+    power_data = browse.getPowerData(page)
+    power_div = render_template(power_frame, power=power_data)
+    return render_template(results_page, query="", results=[page], power_view=power_div) 
 
 
 @app.route('/results/data/<power>')
