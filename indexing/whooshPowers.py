@@ -11,9 +11,15 @@ from whoosh.index import Index, create_in, exists_in, open_dir
 from whoosh.qparser import MultifieldParser
 
 # THESE ONLY WORK WHEN CALLED FROM THE ROOT DIRECTORY
-db_file = os.path.join(os.getcwd(), "scraping/powerData/powers.db")
-index_directory_name = os.path.join(os.getcwd(), "scraping/whooshIndex")
 
+# directory name for the power data
+data_folder = "powerData"
+
+# files and directories
+db_file = os.path.join(os.getcwd(), "scraping", data_folder, "powers.db")
+index_directory_name = os.path.join(os.getcwd(), "scraping", "whooshIndex")
+
+# commandline switches
 help_argument = "--help"
 gui_argument = "--gui"
 
@@ -23,12 +29,32 @@ class PowerData:
     def __init__(self, name, description, alias, application, capability, user, limitation):
         self.name = name
         self.description = description
-        self.alias = alias
-        self.application = application
-        self.capability = capability
-        self.user = user
-        self.limitation = limitation
+        self.alias = csvStringToList(alias)
+        self.application = csvStringToList(application)
+        self.capability = csvStringToList(capability)
+        self.user = csvStringToList(user)
+        self.limitation = csvStringToList(limitation)
         self.path = name.replace(" ", "_")
+        self.normalize()
+
+    # check for any None types and set to an empty list or string
+    def normalize(self):
+        if (self.name is None):
+            self.name = ""
+        if (self.description is None):
+            self.description = ""
+        if (self.alias is None):
+            self.alias = []
+        if (self.application is None):
+            self.application = []
+        if (self.capability is None):
+            self.capability = []
+        if (self.user is None):
+            self.user = []
+        if (self.limitation is None):
+            self.limitation = []
+        if (self.path is None):
+            self.path = ""
 
     def __repr__(self):
         return self.name
@@ -36,25 +62,18 @@ class PowerData:
     def __str__(self):
         return f"{self.name}: {self.description}"
 
-    def asDict(self):
-        d = {
-            "name": 		self.name,
-            "description":  self.description,
-            "alias" :       self.alias, #may cause problems with phrases that intentionally include quote marks...
-            "application" : self.application,
-            "capability" : 	self.capability,
-            "user" : 		self.user, 
-            "limitation" :	self.limitation, 
-        }
-        if d["user"] is None:
-            d["user"] = []
-        if d["alias"] is None:
-            d["alias"] = []
-        if d["capability"] is None:
-            d["capability"] = []
-        if d["limitation"] is None:
-            d["limitation"] = []
-        return d
+#    def asDict(self):
+#        d = {
+#            "name": self.name,
+#            "description": self.description,
+#            "alias": self.alias,  # may cause problems with phrases that intentionally include quote marks...
+#            "application": self.application,
+#            "capability": self.capability,
+#            "user": self.user,
+#            "limitation": self.limitation,
+#        }
+#        return d
+
 
 def main():
     # register signal handler for sigint
@@ -136,8 +155,8 @@ def checkAndLoadIndex() -> Index:
                 # the counts are the same, return our index
                 return indexer
             else:
-                # counts differ, build our index and return it
-                print("Index is incomplete and needs to be built.")
+                # counts don't match, build our index and return it
+                print("Index does not match database and will be built.")
                 return createNewIndex()
 
 
@@ -203,24 +222,24 @@ def search(indexer, searchTerm):
         # search our index with our query
         results = searcher.search(query)
         # display the results
-        print(f"====== Results for '{searchTerm}'")
+        # print(f"====== Results for '{searchTerm}'")
         for line in results:
-            print(f"{line['name']}: {line['description']}")
-            # create a powerdata object from our search data and add to our list
-            alias = csvStringToList(line["alias"])
-            user = csvStringToList(line["user"])
-            limitation = csvStringToList(line["limitation"])
-            search_results.append(PowerData(name=line["name"], description=line["description"],
-                                            alias=alias, application=line["application"],
-                                            capability=line["capability"], user=user,
-                                            limitation=limitation))
-        print(f"====== Total results: {str(len(results))}")
+            # print(f"{line['name']}: {line['description']}")
+            # add the name to our search results
+            search_results.append(line["name"])
+        # print(f"====== Total results: {str(len(results))}")
     # return the data we got from the search results
     return search_results
 
 
 # convert a string with a csv format into a list
 def csvStringToList(in_str: str) -> list:
+    # check if the string is none
+    if (in_str is None):
+        return []
+    # check if the string is empty
+    if (in_str == ""):
+        return []
     # create an in memory file
     str_io = StringIO(in_str)
     # load the file into the csv reader
@@ -364,7 +383,7 @@ def readSqlData(dbfile: str, sql: str, values=None) -> object:
         # close the database connection
         conn.close()
     except Exception as e:
-        print("There was an error executing the SQL statement:\nError: {e}")
+        print(f"There was an error executing the SQL statement:\nError: {e}")
         data = None
     finally:
         # close the connection
@@ -373,31 +392,21 @@ def readSqlData(dbfile: str, sql: str, values=None) -> object:
     # return the error value
     return data
 
-#find index entry with this name, or error
-def getPower(powername, nullable=False):
-    #TODO:  MAKE THIS RUN FROM WHOOSH
+
+# find index entry with this name, or error
+def getPower(powername):
+    # TODO:  MAKE THIS RUN FROM WHOOSH
     columns = "name, description, alias, application, capability, user, limitation"
-    power_entries = readSqlData(db_file, f"SELECT {columns} FROM powers WHERE name = '{powername}'")
-    
-    if len(power_entries) is 0:        
-        print(f"{powername} is not a valid link to an item in the index")
-        if not nullable:
-            power_entries = [[f"No Entry for {powername}.","","","","","","",""]]
-        else:
-            return None #NOT UNTIL WE HANDLE NONE TYPES! BAH
-    if len(power_entries) > 1:
-        #probably shouldn't happen!
-        print(f"multiple entries exist for powername, returning first")
-    power = power_entries[0]
-    linked_power = PowerData(
-        name=power[0],
-        description=power[1],
-        alias=power[2],
-        application=power[3],
-        capability=power[4],
-        user=power[5],
-        limitation=power[6])
-    return linked_power
+    power = readSqlData(db_file, f"SELECT {columns} FROM powers WHERE name=?", values=[powername])
+    # should only have one result from the SQL, set our power entries to the first item
+    if (len(power) >= 1):
+        power = power[0]
+    else:
+        return None
+
+    # create the power data object and return it
+    power_data = PowerData(*power)
+    return power_data
 
 
 if __name__ == '__main__':

@@ -1,10 +1,10 @@
+import json
 import os
-from flask import Flask, render_template, request
-from flask import jsonify
 
-from indexing.whooshPowers import checkAndLoadIndex, search
+from flask import Flask, render_template, request
 
 import browse
+from indexing.whooshPowers import checkAndLoadIndex, search
 
 # template file names
 home_page = "welcome_page.html"
@@ -24,12 +24,6 @@ def index():
     return render_template(home_page)
 
 
-@app.route('/my-link/')
-def my_link():
-    print('clicked')
-    return 'Click'
-
-
 @app.route('/results/', methods=['GET', 'POST'])
 def results():
     global indexr
@@ -45,7 +39,7 @@ def results():
     # this fix stops some exceptions, but creates an ugly page
     power_div = "Term not found."
     if (len(search_results) >= 1):
-        power_div = render_template(power_frame, power=search_results[0])
+        power_div = render_template(power_frame, power=browse.getPowerData(search_results[0]))
     return render_template(results_page, query=keywordquery, results=search_results, power_view=power_div)
 
 
@@ -58,17 +52,16 @@ def pop_result(power_name):
 
 @app.route('/power/<page>')
 def power_page(page):
-    print(f'Loading info for "{page}""')
-    
+    print(f"Loading info for '{page}'")
     power_data = browse.getPowerData(page)
     power_div = render_template(power_frame, power=power_data)
-    return render_template(results_page, query="", results=[page], power_view=power_div) 
+    return render_template(results_page, query="", results=[page], power_view=power_div)
 
 
 @app.route('/results/data/<power>')
 def getPowerData(power):
-    pow = browse.getPowerData(power).asDict()
-    return jsonify(pow)
+    json_power = json.dumps(browse.getPowerData(power))
+    return json_power
 
 
 if __name__ == '__main__':

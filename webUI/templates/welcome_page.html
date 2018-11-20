@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-		<link rel="stylesheet" href= "{{ url_for('static',filename='styles/main.css') }}">
-		<title>Super Search</title>
-	</head>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href= "{{ url_for('static',filename='styles/main.css') }}">
+        <title>Super Search</title>
+    </head>
 
-	<body>
-		<form method="get" action="{{ url_for('results') }}">
-			<label for="searchterm">What do you want to search for:</label>
-			<input type="text" name="searchterm" />
-			<input type="submit" value="Search" />
-		</form>	
-	</body>	
+    <body>
+        <div class="search">
+            <form method="get" action="{{ url_for('results') }}">
+                <label for="searchterm">What do you want to search for:</label>
+                <input type="text" name="searchterm" />
+                <input type="submit" value="Search" />
+            </form>
+        </div>
+    </body>
 </html>
