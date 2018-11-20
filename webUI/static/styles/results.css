@@ -1,0 +1,118 @@
+body {
+    background: #ffffff;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.06);
+    color: #000000;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 24pt;
+    line-height: 1.5;
+    margin: 0 auto;
+    padding: 2em 2em 4em;
+}
+
+/* items below moved from results.html */
+.item1 { 
+    grid-area: header;
+    text-align: center;
+    background-color: rgba(255, 223, 0,1);
+    height: 100px;
+    border-style: solid;
+    border-color: black;
+}
+.item2 { 
+    grid-area: menu;
+    text-align: left;
+    background-color: rgba(0, 176, 240,1);
+    width: 200px;
+    font-size: 10pt;
+    border-style: solid;
+    border-color: black;
+}
+.power_view { 
+    grid-area: main;
+    background-color: rgba(196, 47, 26,1);
+    border-style: solid;
+    border-color: black;
+}
+.item4 { grid-area: right; }
+.item5 { grid-area: footer; }
+.grid-container {
+    display: grid;
+    grid-template-areas:
+        'header header header header header header'
+        'menu main main main main main'
+        'menu main main main main main'
+        'menu main main main main main'
+        'menu main main main main main';
+    grid-gap: 6px;
+    background-color: #ffffff;
+}
+.grid-container > div {
+    /* text-align: center; */
+    font-size: 16pt;
+}
+.power_view {
+    display: grid;
+    grid-template-areas:
+        'pic pic pic name name name name'
+        'pic pic pic desc desc desc desc'
+        'pic pic pic desc desc desc desc'
+        'ali ali ali user user some some'
+        'ali ali ali user user some some';
+    grid-gap: 3px;
+    padding: 3px;
+}
+.picture {
+    grid-area: pic;
+    background-color: rgba(255, 255, 255,1);
+    text-align: center;
+    border-style: solid;
+    border-color: black;
+}
+.power {
+    grid-area: name;
+    text-align: center;
+    background-color: rgba(255, 255, 255,1);
+    border-style: solid;
+    border-color: black;
+}
+.description {
+    grid-area: desc;
+    background-color: rgba(255, 255, 255,1);
+    border-style: solid;
+    border-color: black;
+}
+.alias {
+    grid-area: ali;
+    background-color: rgba(255, 255, 255,1);
+    border-style: solid;
+    border-color: black;
+}
+.users {
+    grid-area: user;
+    background-color: rgba(255, 255, 255,1);
+    border-style: solid;
+    border-color: black;
+}
+.something {
+    grid-area: some;
+    background-color: rgba(255, 255, 255,1);
+    border-style: solid;
+    border-color: black;
+}
+html { height: 100%; }
+a:hover, a:visited, a:link, a:active { text-decoration: none; }
+.grid-container{ min-height: 100%; }
+ul#header li {
+    display:inline;
+    font-size: 16pt;
+}
+div {
+    padding-top: 3px;
+    padding-right: 3px;
+    padding-bottom: 3px;
+    padding-left: 3px;
+    margin-top: 1px;
+    margin-right: 1px;
+    margin-bottom: 1px;
+    margin-left: 1px;
+}

@@ -1,198 +1,53 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-		
-		<title>Super Search: Results</title>
-        <style>
-            .item1 { 
-                grid-area: header;
-                background-color: rgba(255, 223, 0,1);
-                border-style: solid;
-                border-color: black;
-            }
-            .item2 { 
-                grid-area: menu;
-                background-color: rgba(0, 176, 240,1);
-                border-style: solid;
-                border-color: black;
-            }
-            .power_view { 
-                grid-area: main;
-                background-color: rgba(196, 47, 26,1);
-                border-style: solid;
-                border-color: black;
-            }
-            .item4 { grid-area: right; }
-            .item5 { grid-area: footer; }
-
-            .grid-container {
-                display: grid;
-                grid-template-areas:
-                    'header header header header header header'
-                    'menu main main main main main'
-                    'menu main main main main main'
-                    'menu main main main main main'
-                    'menu main main main main main';
-                grid-gap: 10px;
-                background-color: #ffffff;
- 
-            }
-            .grid-container > div {
-                text-align: center;
-                font-size: 30px;
-            }
-    
-            .power_view{
-                display: grid;
-                grid-template-areas:
-                    'pic pic pic name name name name'
-                    'pic pic pic desc desc desc desc'
-                    'pic pic pic desc desc desc desc'
-                    'ali ali ali user user some some'
-                    'ali ali ali user user some some';
-                grid-gap: 15px;
-                padding: 15px;
-            }
-            .picture{
-                grid-area: pic;
-                background-color: rgba(255, 255, 255,1);
-                border-style: solid;
-                border-color: black;
-    
-            }
-            .power{
-                grid-area: name;
-                background-color: rgba(255, 255, 255,1);
-                border-style: solid;
-                border-color: black;
-            }
-            .description{
-                grid-area: desc;
-                background-color: rgba(255, 255, 255,1);
-                border-style: solid;
-                border-color: black;
-    
-            }
-            .alias{
-                grid-area: ali;
-                background-color: rgba(255, 255, 255,1);
-                border-style: solid;
-                border-color: black;
-    
-            }
-            .users{
-                grid-area: user;
-                background-color: rgba(255, 255, 255,1);
-                border-style: solid;
-                border-color: black;
-    
-            }
-            .something{
-                grid-area: some;
-                background-color: rgba(255, 255, 255,1);
-                border-style: solid;
-                border-color: black;
-    
-            }
-            html {
-                height: 100%;
-            }
-            .grid-container{
-                min-height: 100%;
-            }
-            ul#menu li {
-                display:inline;
-                font-size: 12pt;
-            }
-        </style>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href= "{{ url_for('static',filename='styles/results.css') }}">
+        <title>Super Search: Results</title>
 </head>
-        
-    
-    
-    
-    
-	<body class ="grid-container">
-        <!--<div class="grid-container">-->
-            <div class="item1">
-               <ul id="menu">
-                   <li>Enhancements</li>
-                   <li>Mental Powers</li>
-                   <li>Personal Powers</li>
-                   <li>Mimicry</li>
-                   <li>Manipulations</li>
-                   <li>Almighty Powers</li>
-                   <li>
-                       <form method="get" action="{{ url_for('results') }}">
-                            <input type="text" name="searchterm"><br />
-                            <button type="submit" value="Search">Submit</button>
-                        </form>
-                   
-                   </li>
-                </ul>   
-            </div>
-            <div class="item2"> 
-                <table>
-                    <tbody>
-                        {% for power in results %}
-                        <tr>
-                            <td><a onclick="getPowerView('{{power.name|safe}}')" href="javascript:void(0);">{{power.name}}</a></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                    
-                </table>
-            </div>
-            <div class="power_view" id="power-view">   
-                <!-- MAIN POWER VIEW-->
-                {{power_view|safe}}
-                
-            </div>  
-        <!--</div>-->
-        <!-- keeping below for easy reference-->
-	<!--	<h2>
-			<div id='redText'>You</div> <div class='blueText'>searched</div> for: {{query}}
-		</h2>
-		<table>
-			<thead>
-				<tr>
-					<th>Title</th>
-					<th>Description</th>
-					<th>Alias</th>
-					<th>Application</th>
-					<th>Capability</th>
-					<th>User</th>
-					<th>Limitation</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for power in results %}
-				<tr>
-					<td>{{power.name}}</td>
-					<td>{{power.description}}</td>
-					<td>{{power.alias}}</td>
-					<td>{{power.application}}</td>
-					<td>{{power.capability}}</td>
-					<td>{{power.user}}</td>
-					<td>{{power.limitation}}</td>
-				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-		<form method="post" action="{{ url_for('index') }}">
-			<input type="submit" value="Return" />
-		</form>	-->
-    </body>	
+<body class ="grid-container">
+    <!--<div class="grid-container">-->
+    <div class="item1">
+        <ul id="header">
+            <li>Enhancements</li>
+            <li>Mental Powers</li>
+            <li>Personal Powers</li>
+            <li>Mimicry</li>
+            <li>Manipulations</li>
+            <li>Almighty Powers</li>
+            <li>
+                <form method="get" action="{{ url_for('results') }}">
+                    <input type="text" name="searchterm">
+                    <button type="submit" value="Search">Submit</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+    <div class="item2"> 
+        <table>
+            <tbody>
+                {% for power_name in results %}
+                <tr>
+                    <td><a onclick="getPowerView('{{power_name|safe}}')" href="javascript:void(0);">{{power_name|safe}}</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="power_view" id="power-view">   
+        <!-- MAIN POWER VIEW-->
+        {{power_view|safe}}
+    </div>
+</body>
     <script type="text/javascript">
         //var power_name = "Telekinesis" /* example */
-        
         /* accepts power name by exact title match or error */
         function getPowerView(power_name){
             var power_data
             var xmlhttp = new XMLHttpRequest();
             xmlhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    power_data = this.responseText;      
+                    power_data = this.responseText;
                     console.log("retrieved data for " + power_name);
                     //console.log(power_data)
                     document.getElementById("power-view").innerHTML = power_data;
@@ -201,6 +56,5 @@
             xmlhttp.open("GET", "power/"+power_name, true);
             xmlhttp.send();
         }
-        
     </script>
 </html>
