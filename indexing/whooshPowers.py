@@ -10,15 +10,16 @@ from whoosh.fields import ID, TEXT, Schema
 from whoosh.index import Index, create_in, exists_in, open_dir
 from whoosh.qparser import MultifieldParser
 
-# TODO:
-# remove the data being gathered by the search method so only the power names are returned
-# update the powerdata class to check for errors and not return any nones
-# pull the power data from the database instead of passing in the list of search results
-
 # THESE ONLY WORK WHEN CALLED FROM THE ROOT DIRECTORY
-db_file = os.path.join(os.getcwd(), "scraping/powerData/powers.db")
-index_directory_name = os.path.join(os.getcwd(), "scraping/whooshIndex")
 
+# directory name for the power data
+data_folder = "powerData"
+
+# files and directories
+db_file = os.path.join(os.getcwd(), "scraping", data_folder, "powers.db")
+index_directory_name = os.path.join(os.getcwd(), "scraping", "whooshIndex")
+
+# commandline switches
 help_argument = "--help"
 gui_argument = "--gui"
 
