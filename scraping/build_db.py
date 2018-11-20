@@ -3,11 +3,12 @@ import os
 import sqlite3
 import sys
 
+# folder for the power data
 data_folder = "powerData"
 
 # file names
-power_data_file = "powerData/powers_data.json"
-db_file = "powerData/powers.db"
+power_data_file = os.path.join(os.getcwd(), "scraping", data_folder, "powers_data.json")
+db_file = os.path.join(os.getcwd(), "scraping", data_folder, "powers.db")
 
 # attributes to find
 alias_search = ["also cal", "also known", "also named"]
@@ -25,7 +26,7 @@ def main():
             os.mkdir(data_folder)
         except Exception as e:
             # if unable to create the directory, tell the user and exit
-            print("Unable to make data directory.\n{}".format(e))
+            print(f"Unable to make data directory.\n{e}")
             sys.exit(1)
 
     # load our json from file
@@ -35,17 +36,18 @@ def main():
 
     # create the database file
     createDatabase(db_file)
-    
-    #variables for progress report
+
+    # variables for progress report
     progress_check = 0
     progress_total = len(json_data)
-    
+
     for item in json_data:
-        # progress report 
-        if progress_check % 10 == 0:
-            print(f"Building Database: {round(progress_check*100/progress_total,1)}%", end="                                     \r")
+        # progress report
+        if (progress_check % 10 == 0):
+            progress = (progress_check / progress_total) * 100
+            printProgress(progress)
         progress_check += 1
-        
+
         # the attributes we want to save
         name = ""
         description = ""
@@ -91,6 +93,13 @@ def main():
         else:
             # insert the row into the database
             insertRow(db_file, name, description, alias, application, capability, user, limitation)
+    # final update to progress
+    printProgress(100)
+
+
+# output current progress
+def printProgress(progress):
+    print(f" Building Database: {progress:.2f}%", end="\r".rjust(5))
 
 
 # add content to an existing list
@@ -107,6 +116,7 @@ def getContent(content, in_list):
 
 def createDatabase(dbfile: str):
     # database schema:
+    # primary key: name
     # powers ( name (text), description (text), alias (text), application (text),
     #          capability (text), user (text), limitation (text) )
 
@@ -147,7 +157,7 @@ def executeSql(dbfile: str, sql: str, values=None) -> bool:
         # close the database connection
         conn.close()
     except Exception as e:
-        print("There was an error executing the SQL statement:\n{}".format(e))
+        print(f"There was an error executing the SQL statement:\n{e}")
         result = False
     finally:
         # close the connection
@@ -163,7 +173,7 @@ def insertRow(dbfile: str, name: str, description: str, alias: list, application
     # our database's column names
     columns = "name, description, alias, application, capability, user, limitation"
     # the sql statement we will execute
-    sql = "INSERT OR REPLACE INTO powers ({}) VALUES(?,?,?,?,?,?,?)".format(columns)
+    sql = f"INSERT OR REPLACE INTO powers ({columns}) VALUES(?,?,?,?,?,?,?)"
     # our values we are going to inser
     values = (name, description, listToCsv(alias), listToCsv(application),
               listToCsv(capability), listToCsv(user), listToCsv(limitation))
@@ -172,13 +182,15 @@ def insertRow(dbfile: str, name: str, description: str, alias: list, application
 
 # convert a list to a csv style string
 def listToCsv(in_list: list) -> str:
-    s = ""
-    for item in in_list:
-        if (s == ""):
-            s = '"{}"'.format(item)
+    # quote any strings in the list
+    new_list = []
+    for obj in in_list:
+        if (isinstance(obj, str) is True):
+            new_list.append(f'"{obj}"')
         else:
-            s = '{},"{}"'.format(s, item)
-    return s
+            new_list.append(obj)
+    # return the list as a comma separated string
+    return ",".join(new_list)
 
 
 if (__name__ == "__main__"):
