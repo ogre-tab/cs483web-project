@@ -1,46 +1,60 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-		<link rel="stylesheet" href= "{{ url_for('static',filename='styles/main.css') }}">
-		<title>Results</title>
-	</head>
-
-	<body>
-
-		<h2>
-			<div id='redText'>You</div> <div class='blueText'>searched</div> for: {{query}}
-		</h2>
-		
-		<table>
-			<thead>
-				<tr>
-					<th>Title</th>
-					<th>Description</th>
-					<th>Alias</th>
-					<th>Application</th>
-					<th>Capability</th>
-					<th>User</th>
-					<th>Limitation</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for t, d, alias, application, cap, user, limitation in results %}
-				<tr>
-					<td>{{t}}</td>
-					<td>{{d}}</td>
-					<td>{{alias}}</td>
-					<td>{{application}}</td>
-					<td>{{cap}}</td>
-					<td>{{user}}</td>
-					<td>{{limitation}}</td>
-
-				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-		<form method="post" action="{{ url_for('index') }}">
-			<input type="submit" value="Return" />
-		</form>	
-	</body>	
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href= "{{ url_for('static',filename='styles/results.css') }}">
+        <title>Super Search: Results</title>
+</head>
+<body class ="grid-container">
+    <!--<div class="grid-container">-->
+    <div class="item1">
+        <ul id="header">
+            <li>Enhancements</li>
+            <li>Mental Powers</li>
+            <li>Personal Powers</li>
+            <li>Mimicry</li>
+            <li>Manipulations</li>
+            <li>Almighty Powers</li>
+            <li>
+                <form method="get" action="{{ url_for('results') }}">
+                    <input type="text" name="searchterm">
+                    <button type="submit" value="Search">Submit</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+    <div class="item2"> 
+        <table>
+            <tbody>
+                {% for power_name in results %}
+                <tr>
+                    <td><a onclick="getPowerView('{{power_name|safe}}')" href="javascript:void(0);">{{power_name|safe}}</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="power_view" id="power-view">   
+        <!-- MAIN POWER VIEW-->
+        {{power_view|safe}}
+    </div>
+</body>
+    <script type="text/javascript">
+        //var power_name = "Telekinesis" /* example */
+        /* accepts power name by exact title match or error */
+        function getPowerView(power_name){
+            var power_data
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    power_data = this.responseText;
+                    console.log("retrieved data for " + power_name);
+                    //console.log(power_data)
+                    document.getElementById("power-view").innerHTML = power_data;
+                }
+            };
+            xmlhttp.open("GET", "power/"+power_name, true);
+            xmlhttp.send();
+        }
+    </script>
 </html>

@@ -36,6 +36,7 @@ class PowerData:
         self.limitation = csvStringToList(limitation)
         self.path = name.replace(" ", "_")
         self.normalize()
+        print("I am in the PowerData class!")
 
     # check for any None types and set to an empty list or string
     def normalize(self):

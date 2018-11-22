@@ -1,0 +1,30 @@
+<div class="picture"><img src ="https://allinonebusiness-services.co.uk/wp-content/uploads/2015/11/hero-small.png" alt="There should be a picture here"></div>
+
+<div class="power"><h1>{{power.name|safe}}</h1></div>
+<div class="description">
+    <em>{{power.description|safe}}</em><br /><br />
+    {% for value in power.capability  %}
+        {{value}}<br />
+    {% endfor %}
+</div>
+<div class="alias">
+    <h2>Also Known As:</h2>
+    {% for value in power.alias  %}
+        {{ value }}<br />
+    {% endfor %}
+
+</div>
+<div class="users">
+	<h2>Known Users:</h2>
+    <ul style="list-style-type:none">
+    {% for value in power.users %}
+        {{ value }}<br />
+    {% endfor %}
+    </ul>
+</div>
+<div class="something">
+    <h2>Limitations and Counter-abilities:</h2>
+    {% for value in power.limitation %}
+        {{ value }}<br />
+    {% endfor %}
+</div>
