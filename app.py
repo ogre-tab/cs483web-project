@@ -6,7 +6,9 @@ from flask import Flask, render_template, request
 import browse
 from indexing.whooshPowers import checkAndLoadIndex, search
 
-default_power_pic = "https://allinonebusiness-services.co.uk/wp-content/uploads/2015/11/hero-small.png"
+from power_pictures import getPowerPic
+
+
 
 # template file names
 home_page = "welcome_page.html"
@@ -66,7 +68,7 @@ def power_page(page):
 
 def popPowerDiv(power_name):
     power_data = browse.getPowerData(power_name)
-    power_pic = default_power_pic
+    power_pic = getPowerPic(power_name)
     # if powerdata has image link, put it here
     power_div = render_template(
         power_frame, 
