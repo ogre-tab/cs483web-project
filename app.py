@@ -6,6 +6,8 @@ from flask import Flask, render_template, request
 import browse
 from indexing.whooshPowers import checkAndLoadIndex, search
 
+default_power_pic = "https://allinonebusiness-services.co.uk/wp-content/uploads/2015/11/hero-small.png"
+
 # template file names
 home_page = "welcome_page.html"
 results_page = "results.html"
@@ -39,23 +41,38 @@ def results():
     # this fix stops some exceptions, but creates an ugly page
     power_div = "Term not found."
     if (len(search_results) >= 1):
-        power_div = render_template(power_frame, power=browse.getPowerData(search_results[0]))
-    return render_template(results_page, query=keywordquery, results=search_results, power_view=power_div)
+        power_div = popPowerDiv(search_results[0])
+    return render_template(
+        results_page, 
+        query=keywordquery, 
+        results=search_results, 
+        power_view=power_div)
 
 
 @app.route('/results/power/<power_name>')
 def pop_result(power_name):
-    power_data = browse.getPowerData(power_name)
-    power_div = render_template(power_frame, power=power_data)
-    return power_div
+    return popPowerDiv(power_name)
 
 
 @app.route('/power/<page>')
 def power_page(page):
     print(f"Loading info for '{page}'")
-    power_data = browse.getPowerData(page)
-    power_div = render_template(power_frame, power=power_data)
-    return render_template(results_page, query="", results=[page], power_view=power_div)
+    return render_template(
+        results_page, query="", 
+        # adjacent powers?
+        results=[page], 
+        power_view=popPowerDiv(page))
+
+
+def popPowerDiv(power_name):
+    power_data = browse.getPowerData(power_name)
+    power_pic = default_power_pic
+    # if powerdata has image link, put it here
+    power_div = render_template(
+        power_frame, 
+        power=power_data, 
+        power_pic=power_pic)
+    return power_div
 
 
 @app.route('/results/data/<power>')
