@@ -5,10 +5,7 @@ from flask import Flask, render_template, request
 
 import browse
 from indexing.whooshPowers import checkAndLoadIndex, search
-
 from power_pictures import getPowerPic
-
-
 
 # template file names
 home_page = "welcome_page.html"

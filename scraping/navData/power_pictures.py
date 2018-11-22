@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import requests
-from bs4 import BeautifulSoup
 
 default_power_pic = "https://allinonebusiness-services.co.uk/wp-content/uploads/2015/11/hero-small.png"
 # pic_request = f"http://powerlisting.wikia.com/api.php?action=imageserving&format=json&wisTitle={page_name}"
