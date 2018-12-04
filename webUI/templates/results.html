@@ -23,16 +23,9 @@
             </li>
         </ul>
     </div>
-    <div class="item2"> 
-        <table>
-            <tbody>
-                {% for power_name in results %}
-                <tr>
-                    <td><a onclick="getPowerView('{{power_name|safe}}')" href="javascript:void(0);">{{power_name|safe}}</a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="results_view" id="results-view">   
+        <!-- RESULTS LIST VIEW-->
+        {{results_view|safe}}
     </div>
     <div class="power_view" id="power-view">   
         <!-- MAIN POWER VIEW-->
@@ -56,5 +49,32 @@
             xmlhttp.open("GET", "power/"+power_name, true);
             xmlhttp.send();
         }
+        
+        
+        var current_page_num = 1
+        var keywordquery = "{{this_query|safe}}"
+        var results_list = {{results_list|safe}}
+        //this part will be useful later on probably
+        
+        function getResultsPage(page_num){
+            var results_pane
+            if (page_num == '>')
+                current_page_num += 1
+            else if (page_num == '<')
+                current_page_num -= 1
+            else
+                current_page_num = page_num
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    results_pane = this.responseText;
+                    console.log("retrieved page " + current_page_num);
+                    document.getElementById("results-view").innerHTML = results_pane;
+                }
+            };
+            xmlhttp.open("GET", "list/p"+current_page_num+"/"+keywordquery, true);
+            xmlhttp.send();
+        }
+        
     </script>
 </html>
