@@ -1,0 +1,25 @@
+	   
+		Results for {{this_query}}
+		<div>
+			<table>
+				<tbody>
+					{% for power_name in results %}
+					<tr>
+						<td class="menuitem"><a onclick="getPowerView('{{power_name|safe}}')" href="javascript:void(0);">{{power_name|safe}}</a></td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		<div>
+			{% for page in page_nums %}
+			<tr>
+				<td><a onclick="getResultsPage('{{page|safe}}')" href="javascript:void(0);">{{page|safe}}</a></td>
+			</tr>
+			{% endfor %}
+		</div>
+		<div>
+			{{results_range}}
+		</div>
+		<!-- Page buttons here -->
+			

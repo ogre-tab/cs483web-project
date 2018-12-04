@@ -175,7 +175,10 @@ class PowerIndex:
             # create our query
             query = MultifieldParser(columns, schema=self.index.schema).parse(searchTerm)
             # search our index with our query
-            results = searcher.search(query)
+            
+            #results = searcher.search(query)
+            max_results = None
+            results = searcher.search(query, limit=max_results)
             # display the results
             # print(f"====== Results for '{searchTerm}'")
             for line in results:
@@ -325,10 +328,11 @@ class PowerIndex:
         columns = "name, description, alias, application, capability, user, limitation"
         power = self.readSqlData(f"SELECT {columns} FROM powers WHERE name=?", values=[powername])
         # should only have one result from the SQL, set our power entries to the first item
+        if power is None:
+            return None
+
         if (len(power) >= 1):
             power = power[0]
-        else:
-            return None
 
         # create the power data object and return it
         power_data = PowerData(*power)
