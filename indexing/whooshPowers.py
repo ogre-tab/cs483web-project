@@ -329,7 +329,7 @@ class PowerIndex:
         columns = "name, description, alias, application, capability, user, limitation"
         power = self.readSqlData(f"SELECT {columns} FROM powers WHERE name=?", values=[powername])
         # should only have one result from the SQL, set our power entries to the first item
-        if power is None:
+        if power is None or (len(power) < 1):
             return None
 
         if (len(power) >= 1):

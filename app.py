@@ -14,7 +14,7 @@ results_page = "results.html"
 power_frame = "power_div.html"
 results_frame = "results_div.html"
 
-results_per_page = 7
+results_per_page = 10
 
 # create our flask object
 app = Flask(__name__)
@@ -119,10 +119,16 @@ def popResultsDiv(keywordquery, page_num):
         page_num = 1
     results_list = getSearchResults(keywordquery)
     total_count = len(results_list)
+    last_page = (int)(total_count / results_per_page)
+    if (total_count % results_per_page > 0):
+        last_page += 1
+    
+    if (page_num > last_page):
+        page_num = last_page
+    
     page_start = (page_num -1) * results_per_page
     page_end = min(total_count, page_start + results_per_page)
     results_list = results_list[page_start:page_end]
-    last_page = 1+(int)(total_count / results_per_page)
     
     pages = [] 
     if page_num > 1:
