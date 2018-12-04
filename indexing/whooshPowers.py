@@ -7,6 +7,7 @@ from io import StringIO
 from whoosh.fields import ID, TEXT, Schema
 from whoosh.index import Index, create_in, exists_in, open_dir
 from whoosh.qparser import MultifieldParser
+from whoosh.query import Phrase
 
 
 # simple class to store data about a power
@@ -175,17 +176,17 @@ class PowerIndex:
             # create our query
             query = MultifieldParser(columns, schema=self.index.schema).parse(searchTerm)
             # search our index with our query
-            
-            #results = searcher.search(query)
             max_results = None
             results = searcher.search(query, limit=max_results)
+            # get exact title matches
+            exact_phrase = Phrase("name", searchTerm.split(" "))
+            results_exact = searcher.search(exact_phrase, limit=None)
+            # upgrade the exact match with all other results
+            results_exact.upgrade_and_extend(results)
             # display the results
-            # print(f"====== Results for '{searchTerm}'")
-            for line in results:
-                # print(f"{line['name']}: {line['description']}")
+            for line in results_exact:
                 # add the name to our search results
                 search_results.append(line["name"])
-            # print(f"====== Total results: {str(len(results))}")
         # return the data we got from the search results
         return search_results
 
