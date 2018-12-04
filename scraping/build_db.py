@@ -3,12 +3,13 @@ import os
 import sqlite3
 import sys
 
-# folder for the power data
-data_folder = "powerData"
+# folder names
+data_folder_name = "powerData"
+scrape_folder_name = "scraping"
 
 # file names
-power_data_file = os.path.join(os.getcwd(), "scraping", data_folder, "powers_data.json")
-db_file = os.path.join(os.getcwd(), "scraping", data_folder, "powers.db")
+power_data_file_name = "powers_data.json"
+db_file_name = "powers.db"
 
 # attributes to find
 alias_search = ["also cal", "also known", "also named"]
@@ -19,6 +20,13 @@ limitations_search = "limit"
 
 
 def main():
+    # get our paths
+    files = get_paths()
+
+    data_folder = files[data_folder_name]
+    power_data_file = files[power_data_file_name]
+    db_file = files[db_file_name]
+
     # check that our data folder exists
     if (os.path.isdir(data_folder) is False):
         # try to create the directory
@@ -95,6 +103,29 @@ def main():
             insertRow(db_file, name, description, alias, application, capability, user, limitation)
     # final update to progress
     printProgress(100)
+
+
+# get our file names and folder paths
+def get_paths() -> dict:
+    # file paths will get stored in a dictionary
+    fileDict = {}
+    # get our working folder
+    cwd = os.getcwd()
+    # get the base folder of our working folder
+    base = os.path.basename(os.path.normpath(cwd))
+    # check if our base is our target folder
+    if (base == scrape_folder_name):
+        # since our base is our target folder, create the paths without the base added
+        fileDict[power_data_file_name] = os.path.join(cwd, data_folder_name, power_data_file_name)
+        fileDict[db_file_name] = os.path.join(cwd, data_folder_name, db_file_name)
+        fileDict[data_folder_name] = os.path.join(cwd, data_folder_name)
+    else:
+        # since our base is NOT our target folder, create the paths WITH the base added
+        fileDict[power_data_file_name] = os.path.join(cwd, scrape_folder_name, data_folder_name, power_data_file_name)
+        fileDict[db_file_name] = os.path.join(cwd, scrape_folder_name, data_folder_name, db_file_name)
+        fileDict[data_folder_name] = os.path.join(cwd, scrape_folder_name, data_folder_name)
+    # return our file paths
+    return fileDict
 
 
 # output current progress
