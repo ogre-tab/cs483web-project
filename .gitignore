@@ -10,6 +10,9 @@ __pycache__/
 # vs code ignores
 .vscode
 
+#idea editors
+.idea
+
 # apple specific ignores
 .DS_Store
 .AppleDouble

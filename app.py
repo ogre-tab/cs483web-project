@@ -1,13 +1,13 @@
 import json
 import os
 
-from flask import Flask, render_template, request
+from flask import Flask, session, redirect, render_template, url_for, request
 
 import browse
-from indexing.whooshPowers import checkAndLoadIndex, search
+from indexing.whooshPowers import checkAndLoadIndex, search as _search
 
 from power_pictures import getPowerPic
-
+from pagination import Pagination
 
 
 # template file names
@@ -17,6 +17,8 @@ power_frame = "power_div.html"
 
 # create our flask object
 app = Flask(__name__)
+app.secret_key="cowcatsrock"
+
 # change some of our flask settings
 app.template_folder = os.path.join("webUI", "templates")
 app.static_folder = os.path.join("webUI", "static")
@@ -27,27 +29,41 @@ def index():
     print('HEya')
     return render_template(home_page)
 
-
-@app.route('/results/', methods=['GET', 'POST'])
-def results():
+@app.route('/search', methods=['GET','POST'])
+def search():
     global indexr
     if request.method == 'POST':
         data = request.form
     else:
         data = request.args
-    keywordquery = data.get('searchterm')
-    print('Keyword Query is: ' + keywordquery)
-    search_results = search(indexr, keywordquery)
+    session['keywordquery'] = data.get('searchterm')
+    print('Keyword Query is: ' + session['keywordquery'])
+    session['search_results'] = _search(indexr, session['keywordquery'])
+    return redirect('/results/')
+
+def url_for_result_page(page):
+    args = request.view_args.copy()
+    args['page'] = page
+    return url_for(request.endpoint, **args)
+app.jinja_env.globals['url_for_result_page'] = url_for_result_page
+
+@app.route('/results/', defaults={'page': 1})
+@app.route('/results/page/<int:page>')
+def results(page):
+    count = len(session['search_results'])
+    per_page = 5
+    page_results = session['search_results'][(page - 1) * per_page : (page * per_page)]
+    #[0:5]
 
     # check if our search results are empty
     # this fix stops some exceptions, but creates an ugly page
     power_div = "Term not found."
-    if (len(search_results) >= 1):
-        power_div = popPowerDiv(search_results[0])
+    if (count >= 1):
+        power_div = popPowerDiv(page_results[0])
     return render_template(
-        results_page, 
-        query=keywordquery, 
-        results=search_results, 
+        results_page,
+        results=page_results,
+        pagination = Pagination(page,per_page,count),
         power_view=power_div)
 
 
@@ -85,6 +101,5 @@ def getPowerData(power):
 
 if __name__ == '__main__':
     global indexr
-
     indexr = checkAndLoadIndex()
     app.run(debug=True)
