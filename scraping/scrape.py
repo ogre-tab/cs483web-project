@@ -5,21 +5,31 @@ import time
 from datetime import timedelta
 from urllib.request import urlopen
 
-# folder for the power data
-data_folder = "powerData"
+# folder names
+data_folder_name = "powerData"
+scrape_folder_name = "scraping"
 
-# files
-power_list_file = os.path.join(os.getcwd(), "scraping", data_folder, "powers_list.json")
-power_data_file = os.path.join(os.getcwd(), "scraping", data_folder, "powers_data.json")
+# file names
+power_list_file_name = "powers_list.json"
+power_data_file_name = "powers_data.json"
+indented_power_data_file_name = "indented_powers_data.json"
 
-# optional files
-indented_power_data_file = os.path.join(os.getcwd(), "scraping", data_folder, "indented_powers_data.json")
-save_indented_power_data = False
+# create optional files
+create_indented_power_data = False
 
 
 def main():
     # get a start time
     start_time = time.time()
+
+    # get our file paths
+    files = get_paths()
+
+    # get our files and paths from the files dictionary
+    data_folder = files[data_folder_name]
+    power_list_file = files[power_list_file_name]
+    power_data_file = files[power_data_file_name]
+    indented_power_data_file = files[indented_power_data_file_name]
 
     # check that our data folder exists
     if (os.path.isdir(data_folder) is False):
@@ -77,7 +87,7 @@ def main():
         json.dump(powers, f)
 
     # save the dictionary as json in a more readable format
-    if (save_indented_power_data is True):
+    if (create_indented_power_data is True):
         print(f"Writing '{indented_power_data_file}' file...")
         with open(indented_power_data_file, "w") as f:
             json.dump(powers, f, indent=4)
@@ -85,6 +95,31 @@ def main():
     # print the overall time to run
     total_time = time.time() - start_time
     print(f"Done.\nTotal Time: {timedelta(seconds=total_time)}\nPower Count: {count}")
+
+
+# get our file names and folder paths
+def get_paths() -> dict:
+    # file paths will get stored in a dictionary
+    fileDict = {}
+    # get our working folder
+    cwd = os.getcwd()
+    # get the base folder of our working folder
+    base = os.path.basename(os.path.normpath(cwd))
+    # check if our base is our target folder
+    if (base == scrape_folder_name):
+        # since our base is our target folder, create the paths without the base added
+        fileDict[power_list_file_name] = os.path.join(cwd, data_folder_name, power_list_file_name)
+        fileDict[power_data_file_name] = os.path.join(cwd, data_folder_name, power_data_file_name)
+        fileDict[indented_power_data_file_name] = os.path.join(cwd, data_folder_name, indented_power_data_file_name)
+        fileDict[data_folder_name] = os.path.join(cwd, data_folder_name)
+    else:
+        # since our base is NOT our target folder, create the paths WITH the base added
+        fileDict[power_list_file_name] = os.path.join(cwd, scrape_folder_name, data_folder_name, power_list_file_name)
+        fileDict[power_data_file_name] = os.path.join(cwd, scrape_folder_name, data_folder_name, power_data_file_name)
+        fileDict[indented_power_data_file_name] = os.path.join(cwd, scrape_folder_name, data_folder_name, indented_power_data_file_name)
+        fileDict[data_folder_name] = os.path.join(cwd, scrape_folder_name, data_folder_name)
+    # return our file paths
+    return fileDict
 
 
 # create a text progress bar
