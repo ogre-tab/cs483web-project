@@ -3,14 +3,14 @@
     <head>
         <meta charset="UTF-8">
         <link rel="stylesheet" href= "{{ url_for('static',filename='styles/main.css') }}">
-        <title>Super Search</title>
+        <title>SuperPower Super-Search</title>
     </head>
 
     <body>
         <div class="search">
             <form method="get" action="{{ url_for('results') }}">
-                <label for="searchterm">What do you want to search for:</label>
-                <input type="text" name="searchterm" />
+                <label for="query">What do you want to search for:</label>
+                <input type="text" name="query" />
                 <input type="submit" value="Search" />
             </form>
         </div>

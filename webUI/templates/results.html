@@ -7,21 +7,21 @@
 </head>
 <body class ="grid-container">
     <!--<div class="grid-container">-->
-    <div class="item1">
-        <ul id="header">
-            <li>Enhancements</li>
-            <li>Mental Powers</li>
-            <li>Personal Powers</li>
-            <li>Mimicry</li>
-            <li>Manipulations</li>
-            <li>Almighty Powers</li>
-            <li>
-                <form method="get" action="{{ url_for('results') }}">
-                    <input type="text" name="searchterm">
-                    <button type="submit" value="Search">Submit</button>
-                </form>
-            </li>
-        </ul>
+    <div class="item1" >
+                    <ul id="header">
+                        <li class="catitem" onclick="getPowerView('Enhancements')">Enhancements</li>
+                        <li class="catitem" onclick="getPowerView('Mental Powers')">Mental Powers</li>
+                        <li class="catitem" onclick="getPowerView('Personal Powers')">Personal Powers</li>
+                        <li class="catitem" onclick="getPowerView('Mimicry')">Mimicry</td>
+                        <li class="catitem" onclick="getPowerView('Manipulations')">Manipulations</li>
+                        <li class="catitem" onclick="getPowerView('Almighty Powers')">Almighty Powers</li>
+                    </ul>
+        <div>
+            <form method="get" action="{{ url_for('results') }}">
+                <input type="text" name="query">
+                <button type="submit" value="Search">Submit</button>
+            </form>
+        </div>
     </div>
     <div class="results_view" id="results-view">   
         <!-- RESULTS LIST VIEW-->
@@ -46,8 +46,9 @@
                     document.getElementById("power-view").innerHTML = power_data;
                 }
             };
-            xmlhttp.open("GET", "power/"+power_name, true);
+            xmlhttp.open("GET", "search?div=pow&power="+power_name, true);
             xmlhttp.send();
+            document.getElementById("power-view").innerHTML = "<h2>Loading...</h2>";   // Blank page
         }
         
         
@@ -72,7 +73,7 @@
                     document.getElementById("results-view").innerHTML = results_pane;
                 }
             };
-            xmlhttp.open("GET", "list/p"+current_page_num+"/"+keywordquery, true);
+            xmlhttp.open("GET", "search?div=res&query="+keywordquery+"&p="+current_page_num, true);
             xmlhttp.send();
         }
         

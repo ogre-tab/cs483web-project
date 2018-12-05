@@ -1,4 +1,3 @@
-import indexing.whooshPowers as wp
 
 
 # Basic Outline
@@ -12,11 +11,6 @@ def getChildPowersOf(power):
 
 def getParentPowersOf(power):
     return None
-
-
-# find power by exact index match
-def getPowerData(power):
-    return wp.getPower(power)
 
 
 # get a power data in json form
