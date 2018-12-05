@@ -15,7 +15,7 @@
 	<h2>Known Users:</h2>
     <ul style="list-style-type:none">
     {% for value in power.user %}
-        {{ value }}<br />
+        {{ value|safe }}<br />
     {% endfor %}
     </ul>
 </div>

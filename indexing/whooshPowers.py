@@ -3,7 +3,10 @@ import os
 import sqlite3
 import sys
 from io import StringIO
+from urllib.parse import unquote
 
+from bs4 import BeautifulSoup
+from requests import Session
 from whoosh.analysis import LanguageAnalyzer
 from whoosh.fields import ID, TEXT, Schema
 from whoosh.index import Index, create_in, exists_in, open_dir
@@ -333,7 +336,59 @@ class PowerIndex:
 
         # create the power data object and return it
         power_data = PowerData(*power)
+
+        # get the links for the power's users
+        if (power_data is not None):
+            power_data.user = self.getUserLinks(power_data.user)
         return power_data
+
+    # this will take a list of users and search duckduckgo.com for wikia or wikipedia links
+    def getUserLinks(self, user_list: list) -> list:
+        # try to get links, but if an exception occurs, return the input list
+        try:
+            # the list or urls we are building
+            linked_users = []
+            with Session() as session:
+                headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"}
+                # go through the input user list
+                for user in user_list:
+                    # search google.com for the user
+                    web_data = session.get(f"https://www.google.com/search?q={user}", timeout=(5, 15), headers=headers)
+                    # create a bs4 object and parse the returned page
+                    soup = BeautifulSoup(web_data.text, features="html.parser")
+                    # get the divs from the results
+                    divs = soup.findAll("div", attrs={"class": "r"})
+                    # set our stop variable
+                    found_link_for_user = False
+                    # loop through the divs looking for links
+                    for div in divs:
+                        # check our stop variable
+                        if (found_link_for_user is True):
+                            # we found our link so move to the next user
+                            break
+                        # get all the links from the page so we can look through them
+                        links = div.findAll("a", href=True)
+                        # go through the links
+                        for link in links:
+                            # and look for wikia or wikipedia links
+                            if ("wikia.com" in link["href"] or "wikipedia.org" in link["href"]):
+                                # unquote the link so it launches a new page correctly
+                                clean_link = unquote(link["href"])
+                                # create the link for our user and add to our list
+                                linked_users.append(f'<a href="{clean_link}" target="_blank">{user}</a>')
+                                # we only need one link so we can stop our loop here
+                                found_link_for_user = True
+                                break
+                        # check if we found a link
+                        if (found_link_for_user is False):
+                            # no links were found, just add the user
+                            linked_users.append(user)
+            # return our complete list
+            return linked_users
+        except Exception as e:
+            # if any exception happens, just return the original list
+            print(f"USER LINKS FAILED! ({e})")
+            return user_list
 
 
 def main():
