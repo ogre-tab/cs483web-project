@@ -101,11 +101,6 @@ def loadBrowsingPage(terms):
         results_list=json.dumps(search_results))
 
 
-@app.route('/results/power/<power_name>')
-def pop_result(power_name):
-    return popPowerDiv(power_name)
-
-
 @app.route('/power/<page>')
 def power_page(page):
     print(f"Loading info for '{page}'")
@@ -131,7 +126,6 @@ def popPowerDiv(power_name):
     return power_div
 
 
-@app.route('/results/data/<power_name>')
 def getPowerDataJSON(power_name):
     power_data = powerIndex.getPower(power_name)
     if power_data is not None:
@@ -140,12 +134,33 @@ def getPowerDataJSON(power_name):
         return f"Invalid Power Page: {power_name}" 
 
 
+# @app.route('/name-match/<power_title>')
+# def autoComplete(power_title):
+#     matches = []
+#     with open('scraping/powerData/powers_list.json', 'r', encoding='utf-8') as file:
+#         for title in file:
+#             if power_title in title:
+#                 matches.append(title)
+#     # sort by length of result
+#     matches.sort(key = lambda m: len(m))
+#     return json.dumps(matches)
+
+
 def getSearchResults(keywordquery):
-    # Returns list of search results
+    # Returns list of search resultsgetTitleMatches
     print('Keyword Query is: ' + keywordquery)
-    search_results = powerIndex.search(keywordquery)
+    results = []
+    
+    # can we get any exact match on this word?
+    exact_match = powerIndex.getTitleMatch(keywordquery)
+    if exact_match is not None:
+        results += exact_match
+    
+    # normal whoooshy results
+    results += powerIndex.search(keywordquery)
+    
     # Do we need to check for no-list?
-    return search_results
+    return results
 
 
 # This doesn't work yet!  Almost there!
