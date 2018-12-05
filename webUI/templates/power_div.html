@@ -1,5 +1,3 @@
-<div class="picture"><img src ="{{power_pic}}" alt="There should be a picture here"></div>
-
 <div class="power"><h1>{{power.name|safe}}</h1></div>
 <div class="description">
     <em>{{power.description|safe}}</em><br /><br />
@@ -12,7 +10,6 @@
     {% for value in power.alias  %}
         {{ value }}<br />
     {% endfor %}
-
 </div>
 <div class="users">
 	<h2>Known Users:</h2>
@@ -27,4 +24,7 @@
     {% for value in power.limitation %}
         {{ value }}<br />
     {% endfor %}
+</div>
+<div class="picture">
+    <img src="{{power_pic}}" class="power-pic" alt="There should be a picture here">
 </div>

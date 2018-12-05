@@ -1,8 +1,6 @@
 #!/usr/bin/python3
-import os
-import sys
-import json
 import requests
+import json
 
 S = requests.Session()
 """
@@ -32,21 +30,123 @@ categories = [
     ]
 
 
+class PowerNavTree(object):
+    def __init__(self):
+        self.cats = buildNavIndex()      
+    
+    def getSubcategoryOf(self, cat):
+        res = []
+        if cat in self.cats:
+            res = self.cats.get(cat).sub_cat
+        return res
+    
+    def getCatNav(self, cat_name):
+        for cat in self.cats:
+            if cat_name == cat.name:
+                return cat
+        return None
+
+
+class PowerNav(object):
+    def __init__(self, name, parent):
+        self.parent = parent
+        self.name = name
+        self.adjacent = []
+        self.sub_cat = []
+        self.members = []
+        if self.parent is not None:
+            self.parent.sub_cat.append(self)
+        self.members = None
+    
+    def getMembers(self):
+        self.members = []
+        self.members += getCategoryMembers(self)
+    
+    def __repr__(self):
+        cat_prefix = "Category:"
+        if cat_prefix in self.name:
+            return self.name[len(cat_prefix):]
+        return f"{self.name}"
+
+    def getCatPath(self):
+        par = self.parent
+        path = ""
+        while par is not None:
+            path += f"{par}-->"
+            par = par.parent
+        path += f"{self}"
+        return path
+    
+    def __dict__(self):
+        d = {}
+        d['parent'] = self.parent.name
+        d['sub_cat'] = self.sub_cat
+        d['members'] = self.members
+
+
+# class PowerEncoder(JSONEncoder):
+#     def default(self, power):
+#         return power.__dict__
+
+
+def loadNavIndex():
+    return None
+
+
 def main():
-    subcats_1 = []
-    for cat in categories:
-        subcats_1.append(getSubcats(cat))
-    subcats_2 = []
-    for subcat in subcats_1:
-        subcats_2.append(getSubcats(subcat))
+    # buildTextIndex()
+    buildJSONIndex()
+
+
+def buildTextIndex():
+    subcats = buildNavIndex()    
+    members = []
+    for cat in subcats:
+        members += getCategoryMembers(cat)
     with open('power_cats.txt', 'w', encoding='utf-8') as file:
-        for cat in categories:
-            file.write(cat + '\n')
-        for cat in subcats_1:
-            file.write(cat + '\n')
-        for cat in subcats_2:
-            file.write(cat + '\n')
+        for cat in subcats:
+            file.write(f"{cat.getCatPath()} ({len(cat.sub_cat)} subs)" + '\n')
     file.close()
+
+    with open('power_members.txt', 'w', encoding='utf-8') as file:
+        for power in members:
+            file.write(f"{power.getCatPath()}" + '\n')
+    file.close()
+
+
+def buildJSONIndex():
+    subcats = buildNavIndex()    
+    members = []
+    for cat in subcats:
+        members += getCategoryMembers(cat)
+    nav_dict = {}
+    for cat in subcats:
+        nav_dict[cat.name] = cat.__dict__()
+    with open('power_cats.json', 'w', encoding='utf-8') as file:
+        file.write(json.dumps(nav_dict))
+    file.close()
+
+
+def buildNavIndex():
+    subcats = []
+    all_cats = []
+    unchecked = []
+    for cat in categories:
+        unchecked.append(PowerNav(cat, None))
+    while len(unchecked) > 0:
+        newcats = []
+        for cat in unchecked:
+            if cat.name not in all_cats:
+                newcats += getSubcats(cat)
+        subcats += unchecked
+        unchecked = []
+        for cat in newcats:
+            all_cats.append(cat.name)
+            unchecked.append(cat)
+        print(f"{len(newcats)} new categories found")
+        print(f"{len(subcats)} categories found so far ")
+    print(f"scraping of categories complete; {len(subcats)} categories found")
+    return subcats
 
 
 def getCategoryMembers(category):
@@ -55,16 +155,23 @@ def getCategoryMembers(category):
         'list': 'categorymembers',
         'format': 'json',
         'cmlimit': 500,
-        'cmtitle': f"Category:{category}"
+        'cmtitle': category.name
     }
     print(f"getting {category}")
     cm_res = S.get(url=pl_api, params=cm_params)
     cm_json = cm_res.json()
     cmembers = []
-    print(cm_json)
-    members = cm_json['query']['categorymembers']
-    for power in members:
-        cmembers.append(power['title'])
+
+    try:
+        members = cm_json['query']['categorymembers']
+        print(f"found {len(members)} members in {category}")    
+        if len(members) == 500:
+            print("REQUEST CAP HIT, CATEGORY TOO BIG?")
+        for power in members:
+            cmembers.append(PowerNav(power['title'], category))
+    except KeyError:
+        print(f"error while getting sub-categories of {category}")
+
     return cmembers
 
 
@@ -75,16 +182,23 @@ def getSubcats(category):
         'format': 'json',
         'cmtype': 'subcat',
         'cmlimit': 500,
-        'cmtitle': category
+        'cmtitle': category.name
     }
-    print(f"getting {category}")
     subcat_res = S.get(url=pl_api, params=subcat_params)
     subcat_json = subcat_res.json()
     subcats = []
-    print(subcat_json)
-    members = subcat_json['query']['categorymembers']
-    for subcat in members:
-        subcats.append(subcat['title'])
+    try:
+        members = subcat_json['query']['categorymembers']
+        print(f"found {len(members)} sub-categories in {category}")    
+        for subcat in members:
+            found_cat = PowerNav(subcat['title'], category)
+            found_cat.getMembers()
+            subcats.append(found_cat)
+    except KeyError:
+        print(f"error while getting sub-categories of {category}")
+    
+    for subcat in subcats:
+        print(f"{category}-->{subcat}")
     return subcats
 
 

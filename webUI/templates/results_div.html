@@ -1,11 +1,11 @@
 	   
-		Results for {{this_query}}
+		Results for "{{this_query}}"
 		<div>
 			<table>
 				<tbody>
 					{% for power_name in results %}
 					<tr>
-						<td class="menuitem"><a onclick="getPowerView('{{power_name|safe}}')" href="javascript:void(0);">{{power_name|safe}}</a></td>
+						<td class="menuitem" onclick="getPowerView(&quot;{{power_name}}&quot;)">{{power_name}}</td>
 					</tr>
 					{% endfor %}
 				</tbody>
@@ -14,7 +14,7 @@
 		<div>
 			{% for page in page_nums %}
 			<tr>
-				<td><a onclick="getResultsPage('{{page|safe}}')" href="javascript:void(0);">{{page|safe}}</a></td>
+				<td class="pagination"><a onclick="getResultsPage('{{page|safe}}')" href="javascript:void(0);">{{page|safe}}</a></td>
 			</tr>
 			{% endfor %}
 		</div>
