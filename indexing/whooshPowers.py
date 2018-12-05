@@ -4,9 +4,10 @@ import sqlite3
 import sys
 from io import StringIO
 
+from whoosh.analysis import LanguageAnalyzer
 from whoosh.fields import ID, TEXT, Schema
 from whoosh.index import Index, create_in, exists_in, open_dir
-from whoosh.qparser import MultifieldParser
+from whoosh.qparser import MultifieldParser, OrGroup
 from whoosh.query import Phrase
 
 
@@ -86,6 +87,8 @@ class PowerIndex:
         self.db_file = None
         # whoosh index
         self.index = None
+        # the schema our index will use
+        self.schema = None
         # initialize the object
         self.initialize()
 
@@ -93,6 +96,17 @@ class PowerIndex:
     def initialize(self):
         # get our file and folder paths
         self._get_paths()
+        # create our analyzer
+        analyzer = LanguageAnalyzer("en")
+        # create the schema for our index
+        self.schema = Schema(name=TEXT(stored=True, analyzer=analyzer),
+                             description=TEXT(stored=True, analyzer=analyzer),
+                             alias=TEXT(stored=True),
+                             application=TEXT(stored=True, analyzer=analyzer),
+                             capability=TEXT(stored=True, analyzer=analyzer),
+                             user=TEXT(stored=True),
+                             limitation=TEXT(stored=True, analyzer=analyzer),
+                             path=ID(unique=True))
         # load or create or index
         self.index = self.checkAndLoadIndex()
 
@@ -174,7 +188,7 @@ class PowerIndex:
             # our attributes to search in
             columns = ["name", "description", "alias", "application", "capability", "user", "limitation"]
             # create our query
-            query = MultifieldParser(columns, schema=self.index.schema).parse(searchTerm)
+            query = MultifieldParser(columns, schema=self.index.schema, group=OrGroup).parse(searchTerm)
             # search our index with our query
             max_results = None
             results = searcher.search(query, limit=max_results)
@@ -194,17 +208,8 @@ class PowerIndex:
     def _loadIndexFromDisk(self):
         # try to load our index from disk
         try:
-            # create the schema for our index
-            schema = Schema(name=TEXT(stored=True),
-                            description=TEXT(stored=True),
-                            alias=TEXT(stored=True),
-                            application=TEXT(stored=True),
-                            capability=TEXT(stored=True),
-                            user=TEXT(stored=True),
-                            limitation=TEXT(stored=True),
-                            path=ID(unique=True))
             # load the index from our specified directory
-            indexer = open_dir(self.whoosh_index_folder, schema=schema)
+            indexer = open_dir(self.whoosh_index_folder, schema=self.schema)
             # return the loaded index
             print("Loaded index.")
             return indexer
@@ -213,18 +218,9 @@ class PowerIndex:
             return None
 
     def createNewIndex(self):
-        # create the schema for our index
-        schema = Schema(name=TEXT(stored=True),
-                        description=TEXT(stored=True),
-                        alias=TEXT(stored=True),
-                        application=TEXT(stored=True),
-                        capability=TEXT(stored=True),
-                        user=TEXT(stored=True),
-                        limitation=TEXT(stored=True),
-                        path=ID(unique=True))
         # create the index our specified directory
         print("Building index.")
-        indexer = create_in(self.whoosh_index_folder, schema)
+        indexer = create_in(self.whoosh_index_folder, self.schema)
 
         # get all the data from our database to add to the index
         print("Getting data from database...")
