@@ -20,7 +20,7 @@ body {
 }
 #results-view { 
     grid-area: menu;
-    background-color: rgba(0, 176, 240,1);
+    background-color: rgba(0, 176, 240,0.5);
     width: 200px;
     font-size: 14pt;
     border-style: solid;
@@ -36,23 +36,23 @@ body {
     cursor: pointer;
 }
 .menuitem:hover {
-    background-color: #ffffff;
+    background-color: rgb(255, 243, 162);
 }
 .catitem {
     border-radius: 4px;
     margin: 4px;
-    background-color: rgba(196, 47, 26,1);
+    background-color: rgba(196, 47, 26,0.5);
     list-style-type: none;
     padding: 4px;
     cursor: pointer;
     text-align: center;
 }
 .catitem:hover {
-    background-color: #ffffff;
+    background-color: rgba(245, 186, 178, 0.829);
 }
 #power-view { 
     grid-area: main;
-    background-color:  rgba(196, 46, 26, 0.644);
+    background-color:  rgba(196, 46, 26, 0.5);
     border-style: solid;
     border-color: black;
     height:100%;
@@ -89,6 +89,7 @@ body {
     grid-area: pic;
     background-color: rgba(255, 255, 255,1);
     text-align: center;
+    border:6px;
     border-style: solid;
     border-color: black;
     width:512px;
@@ -104,6 +105,7 @@ body {
     grid-area: name;
     text-align: center;
     background-color: rgba(255, 255, 255,1);
+    border:6px;
     border-style: solid;
     border-color: black;
     max-width:80%;

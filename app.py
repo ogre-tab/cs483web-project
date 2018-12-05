@@ -8,7 +8,6 @@ from flask import Flask, render_template, request
 from indexing.whooshPowers import PowerIndex
 from power_pictures import getPowerPic
 
-# from catscraping import PowerNavTree, PowerNav
 
 # template file names
 home_page = "welcome_page.html"
@@ -28,8 +27,6 @@ app.static_folder = os.path.join("webUI", "static")
 # create our power index
 powerIndex = PowerIndex()
 
-# build our nav index:
-# powerNav = PowerNavTree()
 
 """ API Arguments:
         # term to request search results
@@ -72,9 +69,13 @@ def results():
     div = terms.get('div')
     
     if div == 'pow':
+        if terms.get('format') == 'json':
+            return json(getPowerDataJSON(power_path))
         return popPowerDiv(power_path)
     
     if div == 'res':
+        if terms.get('format') == 'json':
+            return json.dumps(getSearchResults(keywordquery))
         return popResultsDiv(keywordquery, page_num)
     
     # default option
@@ -131,7 +132,7 @@ def popPowerDiv(power_name):
 
 
 @app.route('/results/data/<power_name>')
-def getPowerData(power_name):
+def getPowerDataJSON(power_name):
     power_data = powerIndex.getPower(power_name)
     if power_data is not None:
         return json.dumps(power_data)
@@ -147,11 +148,10 @@ def getSearchResults(keywordquery):
     return search_results
 
 
-@app.route('/results/list/<keywordquery>')
-def getSearchResultsJSON(keywordquery):
-    return json.dumps(getSearchResults(keywordquery))
-
-
+# This doesn't work yet!  Almost there!
+# from catscraping import PowerNavTree, PowerNav
+# build our nav index:
+# powerNav = PowerNavTree()
 @app.route('/category/<category_name>')
 def getSubcategoriesJSON(category_name):
     cat_all = powerNav.getCatNav(category_name)
@@ -160,7 +160,6 @@ def getSubcategoriesJSON(category_name):
     return json.dumps(cat_all)
 
 
-@app.route('/results/list/p<page_num>/<keywordquery>')
 def popResultsDiv(keywordquery, page_num):
     # returns page within results
     print(page_num)

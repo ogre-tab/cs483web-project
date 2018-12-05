@@ -1,11 +1,11 @@
 	   
-		Results for {{this_query}}
+		Results for "{{this_query}}"
 		<div>
 			<table>
 				<tbody>
 					{% for power_name in results %}
 					<tr>
-						<td class="menuitem" onclick="getPowerView('{{power_name|safe}}')">{{power_name|safe}}</td>
+						<td class="menuitem" onclick="getPowerView(&quot;{{power_name}}&quot;)">{{power_name}}</td>
 					</tr>
 					{% endfor %}
 				</tbody>
