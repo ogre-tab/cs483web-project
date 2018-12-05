@@ -338,6 +338,20 @@ class PowerIndex:
         # create the power data object and return it
         power_data = PowerData(*power)
         return power_data
+    
+    # Try for a case-insensitive exact match
+    def getTitleMatch(self, powername):
+        titles = self.readSqlData(f"SELECT name FROM powers WHERE name like \"{powername}\"")
+        if titles is not None and len(titles) > 0:
+            # Step 1: steal Trenton's CSV stringy code thingy
+            # Step 2: Profit
+            str_io = StringIO(titles[0][0])
+            csv_r = csv.reader(str_io)
+            csv_list = list(csv_r)
+            if (len(csv_list) > 0):
+                print(csv_list)
+                return csv_list[0]
+        return None
 
 
 def main():
