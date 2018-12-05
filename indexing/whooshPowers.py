@@ -341,7 +341,7 @@ class PowerIndex:
         if (power_data is not None):
             power_data.user = self.getUserLinks(power_data.user)
         return power_data
-    
+
     # Try for a case-insensitive exact match
     def getTitleMatch(self, powername):
         titles = self.readSqlData(f"SELECT name FROM powers WHERE name like \"{powername}\"")
@@ -362,7 +362,9 @@ class PowerIndex:
         try:
             # the list or urls we are building
             linked_users = []
+            # create a requests session to try and speed up the process
             with Session() as session:
+                # change user agents so google gives us a better page to search
                 headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"}
                 # go through the input user list
                 for user in user_list:
@@ -384,8 +386,9 @@ class PowerIndex:
                         links = div.findAll("a", href=True)
                         # go through the links
                         for link in links:
-                            # and look for wikia or wikipedia links
-                            if ("wikia.com" in link["href"] or "wikipedia.org" in link["href"]):
+                            domains = ["fandom.com", "wikia.com", "wikipedia.org"]
+                            # and look for our wanted domains
+                            if (any(domain in link["href"] for domain in domains)):
                                 # unquote the link so it launches a new page correctly
                                 clean_link = unquote(link["href"])
                                 # create the link for our user and add to our list
@@ -393,10 +396,10 @@ class PowerIndex:
                                 # we only need one link so we can stop our loop here
                                 found_link_for_user = True
                                 break
-                        # check if we found a link
-                        if (found_link_for_user is False):
-                            # no links were found, just add the user
-                            linked_users.append(user)
+                    # check if we found a link
+                    if (found_link_for_user is False):
+                        # no links were found, just add the user
+                        linked_users.append(user)
             # return our complete list
             return linked_users
         except Exception as e:
