@@ -341,6 +341,20 @@ class PowerIndex:
         if (power_data is not None):
             power_data.user = self.getUserLinks(power_data.user)
         return power_data
+    
+    # Try for a case-insensitive exact match
+    def getTitleMatch(self, powername):
+        titles = self.readSqlData(f"SELECT name FROM powers WHERE name like \"{powername}\"")
+        if titles is not None and len(titles) > 0:
+            # Step 1: steal Trenton's CSV stringy code thingy
+            # Step 2: Profit
+            str_io = StringIO(titles[0][0])
+            csv_r = csv.reader(str_io)
+            csv_list = list(csv_r)
+            if (len(csv_list) > 0):
+                print(csv_list)
+                return csv_list[0]
+        return None
 
     # this will take a list of users and search duckduckgo.com for wikia or wikipedia links
     def getUserLinks(self, user_list: list) -> list:

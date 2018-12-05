@@ -56,7 +56,6 @@ class PowerNav(object):
         self.members = []
         if self.parent is not None:
             self.parent.sub_cat.append(self)
-        self.members = None
     
     def getMembers(self):
         self.members = []
@@ -79,9 +78,17 @@ class PowerNav(object):
     
     def __dict__(self):
         d = {}
-        d['parent'] = self.parent.name
-        d['sub_cat'] = self.sub_cat
-        d['members'] = self.members
+        if self.parent is not None:
+            d['parent'] = self.parent.name
+        else:
+            d['parent'] = ""
+        d['sub_cat'] = []
+        for sub in self.sub_cat:
+            d['sub_cat'].append(sub.name)
+        d['members'] = []
+        for mem in self.members:
+            d['members'].append(mem.name)
+        return d
 
 
 # class PowerEncoder(JSONEncoder):
@@ -115,10 +122,7 @@ def buildTextIndex():
 
 
 def buildJSONIndex():
-    subcats = buildNavIndex()    
-    members = []
-    for cat in subcats:
-        members += getCategoryMembers(cat)
+    subcats = buildNavIndex()   
     nav_dict = {}
     for cat in subcats:
         nav_dict[cat.name] = cat.__dict__()
