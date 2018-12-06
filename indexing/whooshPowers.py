@@ -24,6 +24,18 @@ class PowerData:
         self.association = self.csvStringToList(association)
         self.path = name.replace(" ", "_")
         self.normalize()
+    
+    def asDict(self):
+        d = {}
+        d['name'] = self.name
+        d['description'] = self.description
+        d['alias'] = self.alias
+        d['application'] = self.application
+        d['capability'] = self.capability
+        d['user'] = self.user
+        d['limitation'] = self.limitation
+        d['association'] = self.association
+        return d
 
     # check for any None types and set to an empty list or string
     def normalize(self):

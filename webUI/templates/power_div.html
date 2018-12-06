@@ -27,8 +27,8 @@
 </div>
 <div class="assoc">
     <h2>Associated Powers:</h2>
-    {% for value in power.associations  %}
-        <button class="pow-button" id="{{value}}" onclick="getPowerView(this.id)"><span>${{value}}</span></button>
+    {% for value in power.association  %}
+        <button class="pow-button" id="{{value}}" onclick="getPowerView(this.id)"><span>{{value}}</span></button>
         <br />
     {% endfor %}
 </div>

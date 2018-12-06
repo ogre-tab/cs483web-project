@@ -72,7 +72,7 @@ def results():
     if power_path is not None:
         if div == 'pow':
             if terms.get('format') == 'json':
-                return json(getPowerDataJSON(power_path))
+                return getPowerDataJSON(power_path)
             return popPowerDiv(power_path)
         if div == 'pic':
             return getPowerPic(power_path)
@@ -134,7 +134,9 @@ def popPowerDiv(power_name):
 def getPowerDataJSON(power_name):
     power_data = powerIndex.getPower(power_name)
     if power_data is not None:
-        return json.dumps(power_data)
+        d = power_data.asDict()
+        print(d)
+        return json.dumps(d)
     else:
         return f"Invalid Power Page: {power_name}" 
 
