@@ -336,28 +336,7 @@ class PowerIndex:
 
         # create the power data object and return it
         power_data = PowerData(*power)
-
-        # get the links for the power's users
-        if (power_data is not None):
-            power_data.user = self.getUserLinks(power_data.user)
         return power_data
-
-    def getUserLinks(self, user_list: list) -> list:
-        # create a new list
-        new_list = []
-        # loop through the users
-        for user in user_list:
-            # get the link from the links database
-            link = self._getLinkForUser(user)
-            # if the link is empty
-            if (link == ""):
-                # just add the user
-                new_list.append(user)
-            else:
-                # otherwise, add a html link
-                new_list.append(f'<a href="{link}" target="_blank">{user}</a>')
-        # return the completed list
-        return new_list
 
     # Try for a case-insensitive exact match
     def getTitleMatch(self, powername):
@@ -372,43 +351,6 @@ class PowerIndex:
                 print(csv_list)
                 return csv_list[0]
         return None
-
-    # this will take a list of users and search google.com for more information
-    def _getLinkForUser(self, user: str) -> str:
-        # a place to store the connection object
-        conn = None
-        # value returned from the sql statement
-        link = ""
-        # try to execute some sql
-        try:
-            # connect to the database (and create the file)
-            conn = sqlite3.connect(self.links_db_file)
-            # create a cursor
-            cur = conn.cursor()
-            # get the known user link from the links database
-            sql = "SELECT link FROM links WHERE name=?"
-            # get the link data as a list
-            data = list(cur.execute(sql, [user]))
-            # check if the list has anything in it
-            if (len(data) >= 1):
-                # get the first row of the data
-                first_row = data[0]
-                # check if the tuple has any items
-                if (len(first_row) >= 1):
-                    # set the link to the first item in the tuple
-                    link = first_row[0]
-            # close the database connection
-            conn.close()
-        except Exception as e:
-            print(f"There was an error executing the SQL statement:\nError: {e}")
-            # we don't know what is in link, so set it to an empty string
-            link = ""
-        finally:
-            # close the connection
-            if (conn is not None):
-                conn.close()
-        # return the error value
-        return link
 
 
 def main():
