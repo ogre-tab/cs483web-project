@@ -1,29 +1,54 @@
-<div class="power"><h1>{{power.name|safe}}</h1></div>
-<div class="description">
-    <em>{{power.description|safe}}</em><br /><br />
-    {% for value in power.capability  %}
-        {{value}}<br />
-    {% endfor %}
+<div class="power">
+    <div>
+        <h1>{{power.name|safe}}</h1>
+    </div>
 </div>
-<div class="alias">
-    <h2>Also Known As:</h2>
-    {% for value in power.alias  %}
-        {{ value }}<br />
-    {% endfor %}
+<div class="description">
+    <div id="desc">
+        <em>{{power.description|safe}}</em><br /><br />
+    </div>
+    
+    <div id="capabilities">
+        {% for value in power.capability  %}
+            {{value}}<br />
+        {% endfor %}
+    </div>
+    
+    <div id="aka">
+        <em>Also Known As: </em> 
+        {% for value in power.alias  %}
+        {{value}}, 
+        {% endfor %}
+               
+    </div>
+    
 </div>
 <div class="users">
 	<h2>Known Users:</h2>
     <ul style="list-style-type:none">
     {% for value in power.user %}
-        {{ value }}<br />
+        <li>{{ value }}</li>
     {% endfor %}
     </ul>
 </div>
 <div class="counters">
-    <h2>Limitations and Counter-abilities:</h2>
-    {% for value in power.limitation %}
-        {{ value }}<br />
-    {% endfor %}
+    <div>
+        <h2>Applications of Power:</h2>
+        <ul>
+            {% for value in power.application  %}
+                <li>{{value}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div>
+        <h2>Limitations and Counter-abilities:</h2>
+        <ul>
+            {% for value in power.limitation  %}
+                <li>{{value}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
 </div>
 <div class="assoc">
     <h2>Associated Powers:</h2>

@@ -42,17 +42,17 @@ class PowerData:
         if (self.name is None):
             self.name = ""
         if (self.description is None):
-            self.description = ""
+            self.description = "No Description Available"
         if (self.alias is None):
-            self.alias = []
+            self.alias = ["(No Aliases for " + self.name + ")"]
         if (self.application is None):
             self.application = []
         if (self.capability is None):
             self.capability = []
         if (self.user is None):
-            self.user = []
+            self.user = ["No Known Users"]
         if (self.limitation is None):
-            self.limitation = []
+            self.limitation = ["No known Limitations or Counter-Abilities"]
         if (self.association is None):
             self.association = []
         if (self.path is None):
@@ -210,7 +210,7 @@ class PowerIndex:
             parser.add_plugin(FuzzyTermPlugin())
             query = parser.parse(searchTerm)
             # search our index with our query
-            max_results = None
+            max_results = 100
             results = searcher.search(query, limit=max_results)
             # get exact title matches
             exact_phrase = Phrase("name", searchTerm.split(" "))
