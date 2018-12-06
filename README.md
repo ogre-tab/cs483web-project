@@ -8,7 +8,6 @@ Required Modules:
 * whoosh
 * sqlite3
 * requests
-* bs4
 
 To run:\
 Clone the repository.
