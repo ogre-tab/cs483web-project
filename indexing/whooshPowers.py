@@ -24,23 +24,35 @@ class PowerData:
         self.association = self.csvStringToList(association)
         self.path = name.replace(" ", "_")
         self.normalize()
+    
+    def asDict(self):
+        d = {}
+        d['name'] = self.name
+        d['description'] = self.description
+        d['alias'] = self.alias
+        d['application'] = self.application
+        d['capability'] = self.capability
+        d['user'] = self.user
+        d['limitation'] = self.limitation
+        d['association'] = self.association
+        return d
 
     # check for any None types and set to an empty list or string
     def normalize(self):
         if (self.name is None):
             self.name = ""
         if (self.description is None):
-            self.description = ""
+            self.description = "No Description Available"
         if (self.alias is None):
-            self.alias = []
+            self.alias = ["(No Aliases for " + self.name + ")"]
         if (self.application is None):
             self.application = []
         if (self.capability is None):
             self.capability = []
         if (self.user is None):
-            self.user = []
+            self.user = ["No Known Users"]
         if (self.limitation is None):
-            self.limitation = []
+            self.limitation = ["No known Limitations or Counter-Abilities"]
         if (self.association is None):
             self.association = []
         if (self.path is None):
@@ -198,7 +210,7 @@ class PowerIndex:
             parser.add_plugin(FuzzyTermPlugin())
             query = parser.parse(searchTerm)
             # search our index with our query
-            max_results = None
+            max_results = 100
             results = searcher.search(query, limit=max_results)
             # get exact title matches
             exact_phrase = Phrase("name", searchTerm.split(" "))
