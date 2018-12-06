@@ -54,9 +54,8 @@ function getCategory(cat_name){
 	xmlhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
 			cat = JSON.parse(this.responseText);
-			
-			cat_list = cat['sub_cat'];  /* pop these somewhere?! */
-			power_list = cat['members'];
+			cat_list = cat['sub_cat'];  /* Do something with this?? */
+			power_list = cat['members']; 
 			console.log("cat data for " + cat_name);
 			document.getElementById("power-list-title").innerText = `Members of ${cat_name}`
 			popPowerList()
@@ -65,6 +64,16 @@ function getCategory(cat_name){
 	xmlhttp.open("GET", `category/${cat_name}`, true);
 	xmlhttp.send();
 	power_list = [];
+}
+
+
+function getLinkButton(power_link){
+	var cat_link = getCategoryName(power_link);
+	if (cat_link != null){
+		return `<button class="catitem" id="${power_link}" onclick="getCategory(this.id)"><span>${cat_link}</span></button>`
+	}
+	else
+		return `<button class="pow-button" id="${power_link}" onclick="getPowerView(this.id)"><span>${power_link}</span></button>`
 }
 
 
@@ -77,14 +86,13 @@ function popPowerList(){
 	/* POWER BUTTONS */
 	for (var i = start_pow; i<end_pow && i < power_list.length; i++ ){
 		var pow = power_list[i];
-		pow_buttons += `<button class="pow-button" id="${pow}" onclick="getPowerView(this.id)"><span>${pow}</span></button>\n`
+		pow_buttons += getLinkButton(pow) + "\n";
 		//button autofocus
 	}
 	document.getElementById("power-list").innerHTML = pow_buttons;
 	
 	/* POWER NAV */
 	pages = power_list.length / results_per_page;
-	
 	
 	var nav_pages = "";
 	if (current_page_num > 1){
@@ -100,8 +108,17 @@ function popPowerList(){
 	
 }
 
+
+function getCategoryName(category_path){
+	var prefix = "Category:";
+	if (category_path.includes(prefix)){
+		return category_path.substring(prefix.length);
+	}
+	return null;
+}
+
+
 function getResultsPage(nav_char){
-	
 	if (nav_char == '>'){
 		current_page_num += 1;
 	}else if (nav_char == '<'){
