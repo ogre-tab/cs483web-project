@@ -13,6 +13,7 @@ from power_pictures import getPowerPic
 home_page = "welcome_page.html"
 results_page = "results.html"
 power_frame = "power_div.html"
+power_frame_null = "empty_power_div.html"
 results_frame = "results_div.html"
 
 results_per_page = 10
@@ -117,7 +118,8 @@ def power_page(page):
 def popPowerDiv(power_name):
     power_data = powerIndex.getPower(power_name)
     if power_data is None:
-        return f"Invalid Power Page: {power_name}" 
+        return render_template(power_frame_null)
+        # return f"Invalid Power Page: {power_name}" 
 
     power_pic = getPowerPic(power_name)
     # if powerdata has image link, put it here
