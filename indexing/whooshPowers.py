@@ -111,6 +111,7 @@ class PowerIndex:
                              capability=TEXT(stored=True, analyzer=analyzer),
                              user=TEXT(stored=True),
                              limitation=TEXT(stored=True, analyzer=analyzer))
+
         # load or create or index
         self.index = self.checkAndLoadIndex()
 
