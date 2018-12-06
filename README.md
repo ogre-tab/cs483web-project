@@ -4,10 +4,11 @@ Group project for CS483 Web Data
 Requires Python 3
 
 Required Modules:
+* flask
 * PyQt5
-* whoosh
-* sqlite3
 * requests
+* sqlite3
+* whoosh
 
 To run:\
 Clone the repository.
