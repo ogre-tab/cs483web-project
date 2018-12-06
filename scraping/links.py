@@ -186,9 +186,6 @@ def getUserLinks(user_set: set) -> dict:
                 if (count % 10 == 0):
                     percent = (count / total) * 100
                     print_progress(percent)
-                # DEBUG: DELETE ME!
-                if (count >= 25):
-                    break
         # return our complete list
         print_progress(100.0)
         print()
