@@ -54,10 +54,11 @@ function getCategory(cat_name){
 	xmlhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
 			cat = JSON.parse(this.responseText);
-			cat_list = cat['sub_cat'];  /* Do something with this?? */
-			power_list = cat['members']; 
+			subcats = cat['sub_cat'];  /* Do something with this?? */
+			powers = cat['members'];
+			power_list = combineLists(subcats, powers);
 			console.log("cat data for " + cat_name);
-			document.getElementById("power-list-title").innerText = `Members of ${cat_name}`
+			document.getElementById("power-list-title").innerText = `Members of ${getCategoryName(cat_name)}`
 			popPowerList()
 		}
 	};
@@ -70,12 +71,27 @@ function getCategory(cat_name){
 function getLinkButton(power_link){
 	var cat_link = getCategoryName(power_link);
 	if (cat_link != null){
-		return `<button class="catitem" id="${power_link}" onclick="getCategory(this.id)"><span>${cat_link}</span></button>`
+		return `<button class="cat-button" id="${power_link}" onclick="getCategory(this.id)"><span>${cat_link}</span></button>`
 	}
 	else
 		return `<button class="pow-button" id="${power_link}" onclick="getPowerView(this.id)"><span>${power_link}</span></button>`
 }
 
+
+function combineLists(subcats, powers){
+	list = [];
+	s = subcats.length;
+	p = powers.length;
+	for (var i = 0; i < s+p; i++){
+		if (i < s){
+			list[i] = subcats[i];
+		}
+		else{
+			list[i] = powers[i-s];
+		}
+	}
+	return list;
+}
 
 function popPowerList(){
 	var pow_buttons = ""
@@ -112,7 +128,7 @@ function popPowerList(){
 function getCategoryName(category_path){
 	var prefix = "Category:";
 	if (category_path.includes(prefix)){
-		return category_path.substring(prefix.length);
+		return ((category_path.substring(prefix.length)).replace(/_/g," "));
 	}
 	return null;
 }

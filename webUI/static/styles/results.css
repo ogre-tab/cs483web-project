@@ -27,17 +27,23 @@ body {
     border-color: black;
     text-align: center;
 }
-.menuitem {
-    border-radius: 4px;
+.cat-button {
+    border-radius: 12px;
     margin: 4px;
-    background-color: rgba(255, 223, 0,1);
+    background-color: rgb(255, 0, 0);
     list-style-type: none;
     padding: 4px;
     cursor: pointer;
+    width:90%;    
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    font-size:12pt;
 }
-.menuitem:hover {
-    background-color: rgb(255, 243, 162);
+.cat-button:hover {
+    background-color: rgb(255, 162, 162);
 }
+.cat-button:active {
+    background-color: rgb(255, 255, 255);
+  }
 .pow-button {
     border-radius: 12px;
     margin: 4px;
