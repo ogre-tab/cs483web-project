@@ -154,13 +154,15 @@ def getSearchResults(keywordquery):
     print('Keyword Query is: ' + keywordquery)
     results = []
     
+    # normal whoooshy results
+    wooshy = powerIndex.search(keywordquery)
+    
     # can we get any exact match on this word?
     exact_match = powerIndex.getTitleMatch(keywordquery)
-    if exact_match is not None:
+    if exact_match is not None and exact_match not in wooshy:
         results += exact_match
     
-    # normal whoooshy results
-    results += powerIndex.search(keywordquery)
+    results += wooshy
     
     # Do we need to check for no-list?
     return results
@@ -177,6 +179,7 @@ def getSubcategoriesJSON(category_name):
     if category_name == "all":
         return json.dumps(categories) 
     return json.dumps(categories[category_name])
+
 
 # Depricated
 def popResultsDiv(keywordquery, page_num):

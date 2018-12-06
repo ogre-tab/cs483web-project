@@ -27,17 +27,23 @@ body {
     border-color: black;
     text-align: center;
 }
-.menuitem {
-    border-radius: 4px;
+.cat-button {
+    border-radius: 12px;
     margin: 4px;
-    background-color: rgba(255, 223, 0,1);
+    background-color: rgb(255, 0, 0);
     list-style-type: none;
     padding: 4px;
     cursor: pointer;
+    width:90%;    
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    font-size:12pt;
 }
-.menuitem:hover {
-    background-color: rgb(255, 243, 162);
+.cat-button:hover {
+    background-color: rgb(255, 162, 162);
 }
+.cat-button:active {
+    background-color: rgb(255, 255, 255);
+  }
 .pow-button {
     border-radius: 12px;
     margin: 4px;
@@ -97,8 +103,8 @@ body {
     grid-template-areas:
         'pic pic pic name name name name'
         'pic pic pic desc desc desc desc'
-        'ali ali user user some some some'
-        'ali ali user user some some some';
+        'assc assc cntr cntr ali ali ali'
+        'assc assc cntr cntr user user user';
     grid-gap: 6px;
     padding: 3px;
 }
@@ -170,8 +176,17 @@ h3{
     padding:12px;
     transform: rotate(-1deg);
 }
-.something {
-    grid-area: some;
+.counters {
+    grid-area: cntr;
+    background-color: rgba(255, 255, 255,1);
+    border-style: solid;
+    border-color: black;
+    
+    padding:12px;
+    transform: rotate(1deg);
+}
+.assoc {
+    grid-area: assc;
     background-color: rgba(255, 255, 255,1);
     border-style: solid;
     border-color: black;
@@ -201,4 +216,3 @@ img{
     height: 100%;
     object-fit: contain;
 }
-
