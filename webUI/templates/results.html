@@ -3,79 +3,60 @@
     <head>
         <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href= "{{ url_for('static',filename='styles/results.css') }}">
+        <script src="{{ url_for('static',filename='scripts/SuperSearcher.js') }}" type="text/javascript" ></script>
+        
         <title>Super Search: Results</title>
 </head>
+
 <body class ="grid-container">
     <!--<div class="grid-container">-->
-    <div class="item1" >
+    <div class="categories" >
+        <!-- Should I put subcategories here? -->
                     <ul id="header">
-                        <li class="catitem" onclick="getPowerView('Enhancements')">Enhancements</li>
-                        <li class="catitem" onclick="getPowerView('Mental Powers')">Mental Powers</li>
-                        <li class="catitem" onclick="getPowerView('Personal Powers')">Personal Powers</li>
-                        <li class="catitem" onclick="getPowerView('Mimicry')">Mimicry</td>
-                        <li class="catitem" onclick="getPowerView('Manipulations')">Manipulations</li>
-                        <li class="catitem" onclick="getPowerView('Almighty Powers')">Almighty Powers</li>
+                        <li class="catitem" onclick="getCategory('Category:Enhancements')">Enhancements</li>
+                        <li class="catitem" onclick="getCategory('Category:Mental_Powers')">Mental Powers</li>
+                        <li class="catitem" onclick="getCategory('Category:Personal_Powers')">Personal Powers</li>
+                        <li class="catitem" onclick="getCategory('Category:Mimicry')">Mimicry</td>
+                        <li class="catitem" onclick="getCategory('Category:Manipulations')">Manipulations</li>
+                        <li class="catitem" onclick="getCategory('Category:Almighty_Powers')">Almighty Powers</li>
                     </ul>
-        <div>
-            <form method="get" action="{{ url_for('results') }}">
-                <input type="text" name="query">
-                <button type="submit" value="Search">Submit</button>
-            </form>
-        </div>
     </div>
-    <div class="results_view" id="results-view">   
+    <div class="results_view" id="results-view"> 
+        <!-- Search Bar -->  
+        <div>
+            <input id="searchbar" type="text" placeholder="Search...">
+            <script type="text/javascript">
+                var inputBox = document.getElementById('searchbar');
+                inputBox.onkeyup = function(){
+                    var searchbarquery = inputBox.value;
+                    searchFor(searchbarquery);
+                }
+            </script>
+        </div>
+        
         <!-- RESULTS LIST VIEW-->
-        {{results_view|safe}}
+	   	<h3 id="power-list-title">Results for "{{this_query}}"</h3>
+        <div id="power-list">
+        </div>
+        <div id="power-list-nav">
+            <tr>
+                
+                <!-- Page buttons here -->
+                buttons
+            </tr>
+        </div>
     </div>
     <div class="power_view" id="power-view">   
         <!-- MAIN POWER VIEW-->
-        {{power_view|safe}}
+        put something here...
     </div>
-</body>
-    <script type="text/javascript">
-        //var power_name = "Telekinesis" /* example */
-        /* accepts power name by exact title match or error */
-        function getPowerView(power_name){
-            var power_data
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    power_data = this.responseText;
-                    console.log("retrieved data for " + power_name);
-                    //console.log(power_data)
-                    document.getElementById("power-view").innerHTML = power_data;
-                }
-            };
-            xmlhttp.open("GET", "search?div=pow&power="+power_name, true);
-            xmlhttp.send();
-            document.getElementById("power-view").innerHTML = "<h2>Loading...</h2>";   // Blank page
-        }
+    <script defer type="text/javascript" >
+        keywordquery = "{{this_query|safe}}";
+        current_power = "{{power_name}}";
         
-        
-        var current_page_num = 1
-        var keywordquery = "{{this_query|safe}}"
-        var results_list = {{results_list|safe}}
-        //this part will be useful later on probably
-        
-        function getResultsPage(page_num){
-            var results_pane
-            if (page_num == '>')
-                current_page_num += 1
-            else if (page_num == '<')
-                current_page_num -= 1
-            else
-                current_page_num = page_num
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    results_pane = this.responseText;
-                    console.log("retrieved page " + current_page_num);
-                    document.getElementById("results-view").innerHTML = results_pane;
-                }
-            };
-            xmlhttp.open("GET", "search?div=res&query="+keywordquery+"&p="+current_page_num, true);
-            xmlhttp.send();
-        }
-        
+        getPowerView(current_power);
+        getSearchResultsList(keywordquery);
     </script>
+</body>
+
 </html>

@@ -68,10 +68,13 @@ def results():
     cat_path = terms.get('category')
     div = terms.get('div')
     
-    if div == 'pow':
-        if terms.get('format') == 'json':
-            return json(getPowerDataJSON(power_path))
-        return popPowerDiv(power_path)
+    if power_path is not None:
+        if div == 'pow':
+            if terms.get('format') == 'json':
+                return json(getPowerDataJSON(power_path))
+            return popPowerDiv(power_path)
+        if div == 'pic':
+            return getPowerPic(power_path)
     
     if div == 'res':
         if terms.get('format') == 'json':
@@ -95,7 +98,7 @@ def loadBrowsingPage(terms):
         results_page,
         query=keywordquery,
         results=search_results,
-        power_view=popPowerDiv(first_power),
+        power_name=first_power,
         this_query=keywordquery,
         results_view=popResultsDiv(keywordquery, 0),
         results_list=json.dumps(search_results))
@@ -164,17 +167,18 @@ def getSearchResults(keywordquery):
 
 
 # This doesn't work yet!  Almost there!
-# from catscraping import PowerNavTree, PowerNav
+from scraping.navData.catscraping import readJSONIndex
+
+
 # build our nav index:
-# powerNav = PowerNavTree()
 @app.route('/category/<category_name>')
 def getSubcategoriesJSON(category_name):
-    cat_all = powerNav.getCatNav(category_name)
-    cat_all + powerNav.getSubcategoryOf(category_name)
-    cat_all + powerNav.getMembersOf(category_name)
-    return json.dumps(cat_all)
+    categories = readJSONIndex()
+    if category_name == "all":
+        return json.dumps(categories) 
+    return json.dumps(categories[category_name])
 
-
+# Depricated
 def popResultsDiv(keywordquery, page_num):
     # returns page within results
     print(page_num)

@@ -32,7 +32,7 @@ categories = [
 
 class PowerNavTree(object):
     def __init__(self):
-        self.cats = buildNavIndex()      
+        self.cats = loadNavIndex()      
     
     def getSubcategoryOf(self, cat):
         res = []
@@ -54,18 +54,18 @@ class PowerNav(object):
         self.adjacent = []
         self.sub_cat = []
         self.members = []
-        if self.parent is not None:
-            self.parent.sub_cat.append(self)
     
     def getMembers(self):
         self.members = []
         self.members += getCategoryMembers(self)
     
     def __repr__(self):
-        cat_prefix = "Category:"
-        if cat_prefix in self.name:
-            return self.name[len(cat_prefix):]
+        
         return f"{self.name}"
+        # cat_prefix = "Category:"
+        # if cat_prefix in self.name:
+        #     return self.name[len(cat_prefix):]
+        # return f"{self.name}"
 
     def getCatPath(self):
         par = self.parent
@@ -97,12 +97,15 @@ class PowerNav(object):
 
 
 def loadNavIndex():
-    return None
+    j_index = readJSONIndex()
+    
+    return j_index
 
 
 def main():
     # buildTextIndex()
     buildJSONIndex()
+    print("everything is loaded")
 
 
 def buildTextIndex():
@@ -129,6 +132,13 @@ def buildJSONIndex():
     with open('power_cats.json', 'w', encoding='utf-8') as file:
         file.write(json.dumps(nav_dict))
     file.close()
+
+
+def readJSONIndex():
+    nav_dict = {}
+    with open('power_cats.json', 'r', encoding='utf-8') as file:
+        nav_dict = json.load(file)
+    return nav_dict
 
 
 def buildNavIndex():
@@ -172,9 +182,10 @@ def getCategoryMembers(category):
         if len(members) == 500:
             print("REQUEST CAP HIT, CATEGORY TOO BIG?")
         for power in members:
-            cmembers.append(PowerNav(power['title'], category))
+            found_cat = PowerNav(power['title'], category)
+            cmembers.append(found_cat)
     except KeyError:
-        print(f"error while getting sub-categories of {category}")
+        print(f"error while getting members of {category}")
 
     return cmembers
 
@@ -196,6 +207,7 @@ def getSubcats(category):
         print(f"found {len(members)} sub-categories in {category}")    
         for subcat in members:
             found_cat = PowerNav(subcat['title'], category)
+            category.sub_cat.append(found_cat)
             found_cat.getMembers()
             subcats.append(found_cat)
     except KeyError:
