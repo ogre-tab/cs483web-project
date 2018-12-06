@@ -19,10 +19,17 @@
     {% endfor %}
     </ul>
 </div>
-<div class="something">
+<div class="counters">
     <h2>Limitations and Counter-abilities:</h2>
     {% for value in power.limitation %}
         {{ value }}<br />
+    {% endfor %}
+</div>
+<div class="assoc">
+    <h2>Associated Powers:</h2>
+    {% for value in power.associations  %}
+        <button class="pow-button" id="{{value}}" onclick="getPowerView(this.id)"><span>${{value}}</span></button>
+        <br />
     {% endfor %}
 </div>
 <div class="picture">
