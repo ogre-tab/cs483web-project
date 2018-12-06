@@ -5,15 +5,15 @@ import sys
 from io import StringIO
 
 from whoosh.analysis import LanguageAnalyzer
-from whoosh.fields import ID, TEXT, Schema
+from whoosh.fields import TEXT, Schema
 from whoosh.index import Index, create_in, exists_in, open_dir
-from whoosh.qparser import MultifieldParser, OrGroup
+from whoosh.qparser import MultifieldParser, OrGroup, FuzzyTermPlugin
 from whoosh.query import Phrase
 
 
 # simple class to store data about a power
 class PowerData:
-    def __init__(self, name, description, alias, application, capability, user, limitation):
+    def __init__(self, name, description, alias, application, capability, user, limitation, association):
         self.name = name
         self.description = description
         self.alias = self.csvStringToList(alias)
@@ -21,6 +21,7 @@ class PowerData:
         self.capability = self.csvStringToList(capability)
         self.user = self.csvStringToList(user)
         self.limitation = self.csvStringToList(limitation)
+        self.association = self.csvStringToList(association)
         self.path = name.replace(" ", "_")
         self.normalize()
 
@@ -40,6 +41,8 @@ class PowerData:
             self.user = []
         if (self.limitation is None):
             self.limitation = []
+        if (self.association is None):
+            self.association = []
         if (self.path is None):
             self.path = ""
 
@@ -107,8 +110,7 @@ class PowerIndex:
                              application=TEXT(stored=True, analyzer=analyzer),
                              capability=TEXT(stored=True, analyzer=analyzer),
                              user=TEXT(stored=True),
-                             limitation=TEXT(stored=True, analyzer=analyzer),
-                             path=ID(unique=True))
+                             limitation=TEXT(stored=True, analyzer=analyzer))
         # load or create or index
         self.index = self.checkAndLoadIndex()
 
@@ -191,7 +193,9 @@ class PowerIndex:
             # our attributes to search in
             columns = ["name", "description", "alias", "application", "capability", "user", "limitation"]
             # create our query
-            query = MultifieldParser(columns, schema=self.index.schema, group=OrGroup).parse(searchTerm)
+            parser = MultifieldParser(columns, schema=self.index.schema, group=OrGroup)
+            parser.add_plugin(FuzzyTermPlugin())
+            query = parser.parse(searchTerm)
             # search our index with our query
             max_results = None
             results = searcher.search(query, limit=max_results)
@@ -241,8 +245,7 @@ class PowerIndex:
                                 application=power[3],
                                 capability=power[4],
                                 user=power[5],
-                                limitation=power[6],
-                                path=power[0].replace(" ", "_"))
+                                limitation=power[6])
             # get the length of our power's name
             length = len(power[0]) + 1
             # update the pad length if needed
@@ -325,7 +328,7 @@ class PowerIndex:
 
     # find index entry with this name, or error
     def getPower(self, powername: str) -> PowerData:
-        columns = "name, description, alias, application, capability, user, limitation"
+        columns = "name, description, alias, application, capability, user, limitation, association"
         power = self.readSqlData(f"SELECT {columns} FROM powers WHERE name=?", values=[powername])
         # should only have one result from the SQL, set our power entries to the first item
         if power is None or (len(power) < 1):
