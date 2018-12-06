@@ -15,6 +15,5 @@ Clone the repository.
 Navigate to the 'scraping' directory.\
 Run 'scrape.py' followed by 'build_db.py'.
 
-Navigate to the 'indexing' directory.\
-Run 'whooshPowers.py' to start the indexer.\
-For a simple user interface, run 'whooshPowers.py --gui'.
+Navigate to the root directory.\
+Run 'app.py' to start the flask webserver.
