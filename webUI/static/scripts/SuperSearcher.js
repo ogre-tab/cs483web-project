@@ -39,7 +39,8 @@ function getSearchResultsList(query){
 		if (this.readyState == 4 && this.status == 200) {
 			power_list = JSON.parse(this.responseText);
 			console.log("retrieved page " + current_page_num);
-			popPowerList(current_page_num)
+			document.getElementById("power-list-title").innerText = `Results for "${keywordquery}"`
+			popPowerList()
 		}
 	};
 	xmlhttp.open("GET", `search?div=res&format=json&query=${keywordquery}`, true);
@@ -48,12 +49,30 @@ function getSearchResultsList(query){
 }
 
 
-function popPowerList(page_num){
+function getCategory(cat_name){
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			cat = JSON.parse(this.responseText);
+			
+			cat_list = cat['sub_cat'];  /* pop these somewhere?! */
+			power_list = cat['members'];
+			console.log("cat data for " + cat_name);
+			document.getElementById("power-list-title").innerText = `Members of ${cat_name}`
+			popPowerList()
+		}
+	};
+	xmlhttp.open("GET", `category/${cat_name}`, true);
+	xmlhttp.send();
+	power_list = [];
+}
+
+
+function popPowerList(){
 	var pow_buttons = ""
 	var results_per_page = 10;
-	current_page_num = page_num
-	var start_pow = results_per_page * (page_num - 1);
-	var end_pow = results_per_page * (page_num);
+	var start_pow = results_per_page * (current_page_num - 1);
+	var end_pow = results_per_page * (current_page_num);
 	
 	/* POWER BUTTONS */
 	for (var i = start_pow; i<end_pow && i < power_list.length; i++ ){
@@ -61,7 +80,6 @@ function popPowerList(page_num){
 		pow_buttons += `<button class="pow-button" id="${pow}" onclick="getPowerView(this.id)"><span>${pow}</span></button>\n`
 		//button autofocus
 	}
-	document.getElementById("power-list-title").innerText = `Results for "${keywordquery}"`
 	document.getElementById("power-list").innerHTML = pow_buttons;
 	
 	/* POWER NAV */
@@ -91,5 +109,5 @@ function getResultsPage(nav_char){
 	}else{
 		current_page_num = parseInt(nav_char);
 	}
-	popPowerList(current_page_num);
+	popPowerList();
 }

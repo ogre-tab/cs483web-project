@@ -32,7 +32,7 @@ categories = [
 
 class PowerNavTree(object):
     def __init__(self):
-        self.cats = buildNavIndex()      
+        self.cats = loadNavIndex()      
     
     def getSubcategoryOf(self, cat):
         res = []
@@ -60,10 +60,12 @@ class PowerNav(object):
         self.members += getCategoryMembers(self)
     
     def __repr__(self):
-        cat_prefix = "Category:"
-        if cat_prefix in self.name:
-            return self.name[len(cat_prefix):]
+        
         return f"{self.name}"
+        # cat_prefix = "Category:"
+        # if cat_prefix in self.name:
+        #     return self.name[len(cat_prefix):]
+        # return f"{self.name}"
 
     def getCatPath(self):
         par = self.parent
@@ -95,12 +97,15 @@ class PowerNav(object):
 
 
 def loadNavIndex():
-    return None
+    j_index = readJSONIndex()
+    
+    return j_index
 
 
 def main():
     # buildTextIndex()
     buildJSONIndex()
+    print("everything is loaded")
 
 
 def buildTextIndex():
@@ -127,6 +132,13 @@ def buildJSONIndex():
     with open('power_cats.json', 'w', encoding='utf-8') as file:
         file.write(json.dumps(nav_dict))
     file.close()
+
+
+def readJSONIndex():
+    nav_dict = {}
+    with open('power_cats.json', 'r', encoding='utf-8') as file:
+        nav_dict = json.load(file)
+    return nav_dict
 
 
 def buildNavIndex():

@@ -10,7 +10,7 @@ body {
 }
 
 /* items below moved from results.html */
-.item1 { 
+.categories { 
     grid-area: header;
     text-align: center;
     background-color: rgba(255, 223, 0,1);

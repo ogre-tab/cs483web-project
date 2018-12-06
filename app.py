@@ -167,16 +167,16 @@ def getSearchResults(keywordquery):
 
 
 # This doesn't work yet!  Almost there!
-# from catscraping import PowerNavTree, PowerNav
+from scraping.navData.catscraping import readJSONIndex
+
+
 # build our nav index:
-# powerNav = PowerNavTree()
 @app.route('/category/<category_name>')
 def getSubcategoriesJSON(category_name):
-    cat_all = powerNav.getCatNav(category_name)
-    cat_all + powerNav.getSubcategoryOf(category_name)
-    cat_all + powerNav.getMembersOf(category_name)
-    return json.dumps(cat_all)
-
+    categories = readJSONIndex()
+    if category_name == "all":
+        return json.dumps(categories) 
+    return json.dumps(categories[category_name])
 
 # Depricated
 def popResultsDiv(keywordquery, page_num):

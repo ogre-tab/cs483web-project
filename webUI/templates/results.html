@@ -10,20 +10,21 @@
 
 <body class ="grid-container">
     <!--<div class="grid-container">-->
-    <div class="item1" >
+    <div class="categories" >
+        <!-- Should I put subcategories here? -->
                     <ul id="header">
-                        <li class="catitem" onclick="getPowerView('Enhancements')">Enhancements</li>
-                        <li class="catitem" onclick="getPowerView('Mental Powers')">Mental Powers</li>
-                        <li class="catitem" onclick="getPowerView('Personal Powers')">Personal Powers</li>
-                        <li class="catitem" onclick="getPowerView('Mimicry')">Mimicry</td>
-                        <li class="catitem" onclick="getPowerView('Manipulations')">Manipulations</li>
-                        <li class="catitem" onclick="getPowerView('Almighty Powers')">Almighty Powers</li>
+                        <li class="catitem" onclick="getCategory('Category:Enhancements')">Enhancements</li>
+                        <li class="catitem" onclick="getCategory('Category:Mental_Powers')">Mental Powers</li>
+                        <li class="catitem" onclick="getCategory('Category:Personal_Powers')">Personal Powers</li>
+                        <li class="catitem" onclick="getCategory('Category:Mimicry')">Mimicry</td>
+                        <li class="catitem" onclick="getCategory('Category:Manipulations')">Manipulations</li>
+                        <li class="catitem" onclick="getCategory('Category:Almighty_Powers')">Almighty Powers</li>
                     </ul>
     </div>
     <div class="results_view" id="results-view"> 
         <!-- Search Bar -->  
         <div>
-            <input id="searchbar" type="text">
+            <input id="searchbar" type="text" placeholder="Search...">
             <script type="text/javascript">
                 var inputBox = document.getElementById('searchbar');
                 inputBox.onkeyup = function(){
