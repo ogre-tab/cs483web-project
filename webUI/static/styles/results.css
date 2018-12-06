@@ -14,7 +14,7 @@ body {
     grid-area: header;
     text-align: center;
     background-color: rgba(255, 223, 0,1);
-    height: 100px;
+    /* height: 100px; */
     border-style: solid;
     border-color: black;
 }
@@ -26,6 +26,11 @@ body {
     border-style: solid;
     border-color: black;
     text-align: center;
+}
+#searchbar{
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    font-size:14pt;
+    max-width:100%
 }
 .cat-button {
     border-radius: 12px;
@@ -105,8 +110,8 @@ body {
         'pic pic pic desc desc desc desc'
         'assc assc cntr cntr ali ali ali'
         'assc assc cntr cntr user user user';
-    grid-gap: 6px;
-    padding: 3px;
+    grid-gap: 12px;
+    padding: 12px;
 }
 .picture {
     grid-area: pic;
@@ -119,7 +124,6 @@ body {
     max-width:95%;
     max-height:512px;
     overflow:hidden;
-    
     /* because this is cute */
     transform: rotate(-10deg);
     box-shadow: 10px 10px 5px rgba(128, 128, 128, 0.425);
@@ -132,7 +136,7 @@ body {
     border-style: solid;
     border-color: black;
     max-width:80%;
-    max-height:80%;
+    max-height:100%;
     transform: rotate(-1deg);
 }
 .power-pic{
@@ -140,7 +144,7 @@ body {
 }
 h1{
     font-family: "Comic Sans MS", cursive, sans-serif;
-    font-size:28pt;
+    font-size:34pt;
 }
 h2{
     font-family: "Comic Sans MS", cursive, sans-serif;

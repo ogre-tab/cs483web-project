@@ -4,7 +4,6 @@ var current_page_num = 1
 var keywordquery = ""
 var power_list = []
 
-
 /* accepts power name by exact title match or error */
 function getPowerView(power_name){
 	current_power = power_name
@@ -20,9 +19,9 @@ function getPowerView(power_name){
 	};
 	xmlhttp.open("GET", `search?div=pow&power=${power_name}`, true);
 	xmlhttp.send();
-	document.getElementById("power-view").innerHTML = "<h2>Loading...</h2>";   // Blank page
+	getLoadingScreen();
+	document.getElementById("power-view").innerHTML =  "<h2>Loading...</h2>";   // Blank page
 }
-
 
 function searchFor(query){
 	keywordquery = query;
@@ -39,7 +38,11 @@ function getSearchResultsList(query){
 		if (this.readyState == 4 && this.status == 200) {
 			power_list = JSON.parse(this.responseText);
 			console.log("retrieved page " + current_page_num);
-			document.getElementById("power-list-title").innerText = `Results for "${keywordquery}"`
+			var res_title = `Results for "${keywordquery}"`
+			if (power_list.length == 0){
+				res_title = `No Results for "${keywordquery}"`
+			}
+			document.getElementById("power-list-title").innerText = res_title;
 			popPowerList()
 		}
 	};

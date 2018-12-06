@@ -7,11 +7,13 @@
     </head>
 
     <body>
+        <img src="{{ url_for('static',filename='styles/images/sstlogo.png') }}" width=100% alt="SuperPower SuperSearch">
         <div class="search">
             <form method="get" action="{{ url_for('results') }}">
-                <label for="query">What do you want to search for:</label>
-                <input type="text" name="query" />
-                <input type="submit" value="Search" />
+                <!-- <label for="query"></label> -->
+                <input type="text" name="query" id="searchbar" placeholder="Search by Power or User..." />
+                <!-- <img src="{{url_for('static',filename='styles/images/searchbutton.png')}}" alt="Submit"> -->
+                <input class="button" type="submit" value="Search" />
             </form>
         </div>
     </body>
