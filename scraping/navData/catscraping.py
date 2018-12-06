@@ -54,8 +54,6 @@ class PowerNav(object):
         self.adjacent = []
         self.sub_cat = []
         self.members = []
-        if self.parent is not None:
-            self.parent.sub_cat.append(self)
     
     def getMembers(self):
         self.members = []
@@ -172,9 +170,10 @@ def getCategoryMembers(category):
         if len(members) == 500:
             print("REQUEST CAP HIT, CATEGORY TOO BIG?")
         for power in members:
-            cmembers.append(PowerNav(power['title'], category))
+            found_cat = PowerNav(power['title'], category)
+            cmembers.append(found_cat)
     except KeyError:
-        print(f"error while getting sub-categories of {category}")
+        print(f"error while getting members of {category}")
 
     return cmembers
 
@@ -196,6 +195,7 @@ def getSubcats(category):
         print(f"found {len(members)} sub-categories in {category}")    
         for subcat in members:
             found_cat = PowerNav(subcat['title'], category)
+            category.sub_cat.append(found_cat)
             found_cat.getMembers()
             subcats.append(found_cat)
     except KeyError:

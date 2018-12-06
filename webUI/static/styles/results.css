@@ -38,6 +38,23 @@ body {
 .menuitem:hover {
     background-color: rgb(255, 243, 162);
 }
+.pow-button {
+    border-radius: 12px;
+    margin: 4px;
+    background-color: rgba(255, 223, 0,1);
+    list-style-type: none;
+    padding: 4px;
+    cursor: pointer;
+    width:90%;    
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    font-size:12pt;
+}
+.pow-button:hover {
+    background-color: rgb(255, 243, 162);
+}
+.pow-button:active {
+    background-color: rgb(255, 255, 255);
+  }
 .catitem {
     border-radius: 4px;
     margin: 4px;
