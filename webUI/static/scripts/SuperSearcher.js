@@ -19,7 +19,6 @@ function getPowerView(power_name){
 	};
 	xmlhttp.open("GET", `search?div=pow&power=${power_name}`, true);
 	xmlhttp.send();
-	getLoadingScreen();
 	document.getElementById("power-view").innerHTML =  "<h2>Loading...</h2>";   // Blank page
 }
 

@@ -28,13 +28,6 @@
         <!-- Search Bar -->  
         <div>
             <input id="searchbar" type="text" placeholder="Search...">
-            <script type="text/javascript">
-                var inputBox = document.getElementById('searchbar');
-                inputBox.onkeyup = function(){
-                    var searchbarquery = inputBox.value;
-                    searchFor(searchbarquery);
-                }
-            </script>
         </div>
         
         <!-- RESULTS LIST VIEW-->
@@ -57,7 +50,17 @@
         current_power = "{{power_name}}";
         
         getPowerView(current_power);
-        getSearchResultsList(keywordquery);
+        
+        var inputBox = document.getElementById('searchbar');
+        inputBox.onkeyup = function(){
+            var searchbarquery = inputBox.value;
+            searchFor(searchbarquery);
+        };
+        inputBox.value = keywordquery;
+        
+        searchFor(keywordquery);
+        
+        
     </script>
 </body>
 
