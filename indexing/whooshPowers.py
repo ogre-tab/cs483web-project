@@ -4,15 +4,16 @@ import sqlite3
 import sys
 from io import StringIO
 
-from whoosh.fields import ID, TEXT, Schema
+from whoosh.analysis import LanguageAnalyzer
+from whoosh.fields import TEXT, Schema
 from whoosh.index import Index, create_in, exists_in, open_dir
-from whoosh.qparser import MultifieldParser
+from whoosh.qparser import MultifieldParser, OrGroup, FuzzyTermPlugin
 from whoosh.query import Phrase
 
 
 # simple class to store data about a power
 class PowerData:
-    def __init__(self, name, description, alias, application, capability, user, limitation):
+    def __init__(self, name, description, alias, application, capability, user, limitation, association):
         self.name = name
         self.description = description
         self.alias = self.csvStringToList(alias)
@@ -20,6 +21,7 @@ class PowerData:
         self.capability = self.csvStringToList(capability)
         self.user = self.csvStringToList(user)
         self.limitation = self.csvStringToList(limitation)
+        self.association = self.csvStringToList(association)
         self.path = name.replace(" ", "_")
         self.normalize()
 
@@ -39,6 +41,8 @@ class PowerData:
             self.user = []
         if (self.limitation is None):
             self.limitation = []
+        if (self.association is None):
+            self.association = []
         if (self.path is None):
             self.path = ""
 
@@ -53,7 +57,7 @@ class PowerData:
         # create an in memory file
         str_io = StringIO(in_str)
         # load the file into the csv reader
-        csv_r = csv.reader(str_io)
+        csv_r = csv.reader(str_io, delimiter=',', quotechar='"')
         # get a list from the reader
         csv_list = list(csv_r)
         # for some reason the list is wrapped in a list
@@ -80,12 +84,16 @@ class PowerIndex:
         self._scrape_folder_name = "scraping"
         self._whoosh_index_folder_name = "whooshIndex"
         # file names
-        self._db_file_name = "powers.db"
+        self._powers_db_file_name = "powers.db"
+        self._links_db_file_name = "links.db"
         # paths
         self.whoosh_index_folder = None
-        self.db_file = None
+        self.powers_db_file = None
+        self.links_db_file = None
         # whoosh index
         self.index = None
+        # the schema our index will use
+        self.schema = None
         # initialize the object
         self.initialize()
 
@@ -93,6 +101,17 @@ class PowerIndex:
     def initialize(self):
         # get our file and folder paths
         self._get_paths()
+        # create our analyzer
+        analyzer = LanguageAnalyzer("en")
+        # create the schema for our index
+        self.schema = Schema(name=TEXT(stored=True, analyzer=analyzer),
+                             description=TEXT(stored=True, analyzer=analyzer),
+                             alias=TEXT(stored=True),
+                             application=TEXT(stored=True, analyzer=analyzer),
+                             capability=TEXT(stored=True, analyzer=analyzer),
+                             user=TEXT(stored=True),
+                             limitation=TEXT(stored=True, analyzer=analyzer))
+
         # load or create or index
         self.index = self.checkAndLoadIndex()
 
@@ -110,7 +129,8 @@ class PowerIndex:
             # since our base is NOT our target folder, create the paths WITH the base added
             self.whoosh_index_folder = os.path.join(cwd, self._index_folder_name, self._whoosh_index_folder_name)
         # add our database path that should not be in the base folder
-        self.db_file = os.path.join(cwd, self._scrape_folder_name, self._data_folder_name, self._db_file_name)
+        self.powers_db_file = os.path.join(cwd, self._scrape_folder_name, self._data_folder_name, self._powers_db_file_name)
+        self.links_db_file = os.path.join(cwd, self._scrape_folder_name, self._data_folder_name, self._links_db_file_name)
 
     # look for an existing working index or create a new index
     def checkAndLoadIndex(self) -> Index:
@@ -174,7 +194,9 @@ class PowerIndex:
             # our attributes to search in
             columns = ["name", "description", "alias", "application", "capability", "user", "limitation"]
             # create our query
-            query = MultifieldParser(columns, schema=self.index.schema).parse(searchTerm)
+            parser = MultifieldParser(columns, schema=self.index.schema, group=OrGroup)
+            parser.add_plugin(FuzzyTermPlugin())
+            query = parser.parse(searchTerm)
             # search our index with our query
             max_results = None
             results = searcher.search(query, limit=max_results)
@@ -194,17 +216,8 @@ class PowerIndex:
     def _loadIndexFromDisk(self):
         # try to load our index from disk
         try:
-            # create the schema for our index
-            schema = Schema(name=TEXT(stored=True),
-                            description=TEXT(stored=True),
-                            alias=TEXT(stored=True),
-                            application=TEXT(stored=True),
-                            capability=TEXT(stored=True),
-                            user=TEXT(stored=True),
-                            limitation=TEXT(stored=True),
-                            path=ID(unique=True))
             # load the index from our specified directory
-            indexer = open_dir(self.whoosh_index_folder, schema=schema)
+            indexer = open_dir(self.whoosh_index_folder, schema=self.schema)
             # return the loaded index
             print("Loaded index.")
             return indexer
@@ -213,18 +226,9 @@ class PowerIndex:
             return None
 
     def createNewIndex(self):
-        # create the schema for our index
-        schema = Schema(name=TEXT(stored=True),
-                        description=TEXT(stored=True),
-                        alias=TEXT(stored=True),
-                        application=TEXT(stored=True),
-                        capability=TEXT(stored=True),
-                        user=TEXT(stored=True),
-                        limitation=TEXT(stored=True),
-                        path=ID(unique=True))
         # create the index our specified directory
         print("Building index.")
-        indexer = create_in(self.whoosh_index_folder, schema)
+        indexer = create_in(self.whoosh_index_folder, self.schema)
 
         # get all the data from our database to add to the index
         print("Getting data from database...")
@@ -242,8 +246,7 @@ class PowerIndex:
                                 application=power[3],
                                 capability=power[4],
                                 user=power[5],
-                                limitation=power[6],
-                                path=power[0].replace(" ", "_"))
+                                limitation=power[6])
             # get the length of our power's name
             length = len(power[0]) + 1
             # update the pad length if needed
@@ -265,7 +268,7 @@ class PowerIndex:
         return indexer
 
     # execute some sql and return true on an error
-    def executeSql(self, dbfile: str, sql: str, values=None) -> bool:
+    def executeSql(self, sql: str, values=None) -> bool:
         # a place to store the connection object
         conn = None
         # did the command return an error
@@ -273,7 +276,7 @@ class PowerIndex:
         # try to execute some sql
         try:
             # connect to the database (and create the file)
-            conn = sqlite3.connect(dbfile)
+            conn = sqlite3.connect(self.powers_db_file)
             # create a cursor
             cur = conn.cursor()
             # check if there are any values to use and execute the sql
@@ -304,7 +307,7 @@ class PowerIndex:
         # try to execute some sql
         try:
             # connect to the database (and create the file)
-            conn = sqlite3.connect(self.db_file)
+            conn = sqlite3.connect(self.powers_db_file)
             # create a cursor
             cur = conn.cursor()
             # check if there are any values to use and execute the sql
@@ -326,7 +329,7 @@ class PowerIndex:
 
     # find index entry with this name, or error
     def getPower(self, powername: str) -> PowerData:
-        columns = "name, description, alias, application, capability, user, limitation"
+        columns = "name, description, alias, application, capability, user, limitation, association"
         power = self.readSqlData(f"SELECT {columns} FROM powers WHERE name=?", values=[powername])
         # should only have one result from the SQL, set our power entries to the first item
         if power is None or (len(power) < 1):
@@ -338,7 +341,7 @@ class PowerIndex:
         # create the power data object and return it
         power_data = PowerData(*power)
         return power_data
-    
+
     # Try for a case-insensitive exact match
     def getTitleMatch(self, powername):
         titles = self.readSqlData(f"SELECT name FROM powers WHERE name like \"{powername}\"")

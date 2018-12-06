@@ -1,7 +1,9 @@
+import csv
 import json
 import os
 import sqlite3
 import sys
+from io import StringIO
 
 # folder names
 data_folder_name = "powerData"
@@ -17,6 +19,7 @@ application_search = "application"
 capabilities_search = "capabilit"
 known_users_search = ["know users", "known user", "users"]
 limitations_search = "limit"
+associations_search = "associations"
 
 
 def main():
@@ -64,6 +67,7 @@ def main():
         capability = []
         user = []
         limitation = []
+        association = []
 
         # read the json and build our database
         for attribute in json_data[item]:
@@ -94,13 +98,16 @@ def main():
                 # get the limitation
                 elif (limitations_search in lower_title):
                     getContent(content, limitation)
+                # get the associations
+                elif (associations_search in lower_title):
+                    getContent(content, association)
         # check if the power is a category
-        if (not alias and not application and not capability and not user and not limitation):
+        if (not alias and not application and not capability and not user and not limitation and not association):
             # don't add the category
             continue
         else:
             # insert the row into the database
-            insertRow(db_file, name, description, alias, application, capability, user, limitation)
+            insertRow(db_file, name, description, alias, application, capability, user, limitation, association)
     # final update to progress
     printProgress(100)
 
@@ -160,6 +167,7 @@ def createDatabase(dbfile: str):
                 capability TEXT,
                 user TEXT,
                 limitation TEXT,
+                association TEXT,
                 PRIMARY KEY (name)
             )"""
     # execute the sql statement
@@ -200,14 +208,15 @@ def executeSql(dbfile: str, sql: str, values=None) -> bool:
 
 # insert or replace a row in our database
 def insertRow(dbfile: str, name: str, description: str, alias: list, application: list,
-              capability: list, user: list, limitation: list):
+              capability: list, user: list, limitation: list, association: list):
     # our database's column names
-    columns = "name, description, alias, application, capability, user, limitation"
+    columns = "name, description, alias, application, capability, user, limitation, association"
     # the sql statement we will execute
-    sql = f"INSERT OR REPLACE INTO powers ({columns}) VALUES(?,?,?,?,?,?,?)"
+    sql = f"INSERT OR REPLACE INTO powers ({columns}) VALUES(?,?,?,?,?,?,?,?)"
     # our values we are going to inser
     values = (name, description, listToCsv(alias), listToCsv(application),
-              listToCsv(capability), listToCsv(user), listToCsv(limitation))
+              listToCsv(capability), listToCsv(user), listToCsv(limitation),
+              listToCsv(association))
     executeSql(dbfile, sql, values)
 
 
@@ -217,11 +226,17 @@ def listToCsv(in_list: list) -> str:
     new_list = []
     for obj in in_list:
         if (isinstance(obj, str) is True):
-            new_list.append(f'"{obj}"')
+            new_list.append(str(obj))
         else:
             new_list.append(obj)
+    # create a stream for the csv writer
+    output = StringIO()
+    # create the csv writer
+    writer = csv.writer(output, delimiter=',', quotechar='"')
+    # write our string to the stream
+    writer.writerow(new_list)
     # return the list as a comma separated string
-    return ",".join(new_list)
+    return output.getvalue()
 
 
 if (__name__ == "__main__"):
