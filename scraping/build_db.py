@@ -1,7 +1,9 @@
+import csv
 import json
 import os
 import sqlite3
 import sys
+from io import StringIO
 
 # folder names
 data_folder_name = "powerData"
@@ -217,11 +219,17 @@ def listToCsv(in_list: list) -> str:
     new_list = []
     for obj in in_list:
         if (isinstance(obj, str) is True):
-            new_list.append(f'"{obj}"')
+            new_list.append(str(obj))
         else:
             new_list.append(obj)
+    # create a stream for the csv writer
+    output = StringIO()
+    # create the csv writer
+    writer = csv.writer(output, delimiter=',', quotechar='"')
+    # write our string to the stream
+    writer.writerow(new_list)
     # return the list as a comma separated string
-    return ",".join(new_list)
+    return output.getvalue()
 
 
 if (__name__ == "__main__"):

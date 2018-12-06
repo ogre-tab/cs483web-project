@@ -3,10 +3,7 @@ import os
 import sqlite3
 import sys
 from io import StringIO
-from urllib.parse import unquote
 
-from bs4 import BeautifulSoup
-from requests import Session
 from whoosh.analysis import LanguageAnalyzer
 from whoosh.fields import ID, TEXT, Schema
 from whoosh.index import Index, create_in, exists_in, open_dir
@@ -57,7 +54,7 @@ class PowerData:
         # create an in memory file
         str_io = StringIO(in_str)
         # load the file into the csv reader
-        csv_r = csv.reader(str_io)
+        csv_r = csv.reader(str_io, delimiter=',', quotechar='"')
         # get a list from the reader
         csv_list = list(csv_r)
         # for some reason the list is wrapped in a list
@@ -84,10 +81,12 @@ class PowerIndex:
         self._scrape_folder_name = "scraping"
         self._whoosh_index_folder_name = "whooshIndex"
         # file names
-        self._db_file_name = "powers.db"
+        self._powers_db_file_name = "powers.db"
+        self._links_db_file_name = "links.db"
         # paths
         self.whoosh_index_folder = None
-        self.db_file = None
+        self.powers_db_file = None
+        self.links_db_file = None
         # whoosh index
         self.index = None
         # the schema our index will use
@@ -127,7 +126,8 @@ class PowerIndex:
             # since our base is NOT our target folder, create the paths WITH the base added
             self.whoosh_index_folder = os.path.join(cwd, self._index_folder_name, self._whoosh_index_folder_name)
         # add our database path that should not be in the base folder
-        self.db_file = os.path.join(cwd, self._scrape_folder_name, self._data_folder_name, self._db_file_name)
+        self.powers_db_file = os.path.join(cwd, self._scrape_folder_name, self._data_folder_name, self._powers_db_file_name)
+        self.links_db_file = os.path.join(cwd, self._scrape_folder_name, self._data_folder_name, self._links_db_file_name)
 
     # look for an existing working index or create a new index
     def checkAndLoadIndex(self) -> Index:
@@ -264,7 +264,7 @@ class PowerIndex:
         return indexer
 
     # execute some sql and return true on an error
-    def executeSql(self, dbfile: str, sql: str, values=None) -> bool:
+    def executeSql(self, sql: str, values=None) -> bool:
         # a place to store the connection object
         conn = None
         # did the command return an error
@@ -272,7 +272,7 @@ class PowerIndex:
         # try to execute some sql
         try:
             # connect to the database (and create the file)
-            conn = sqlite3.connect(dbfile)
+            conn = sqlite3.connect(self.powers_db_file)
             # create a cursor
             cur = conn.cursor()
             # check if there are any values to use and execute the sql
@@ -303,7 +303,7 @@ class PowerIndex:
         # try to execute some sql
         try:
             # connect to the database (and create the file)
-            conn = sqlite3.connect(self.db_file)
+            conn = sqlite3.connect(self.powers_db_file)
             # create a cursor
             cur = conn.cursor()
             # check if there are any values to use and execute the sql
@@ -342,6 +342,23 @@ class PowerIndex:
             power_data.user = self.getUserLinks(power_data.user)
         return power_data
 
+    def getUserLinks(self, user_list: list) -> list:
+        # create a new list
+        new_list = []
+        # loop through the users
+        for user in user_list:
+            # get the link from the links database
+            link = self._getLinkForUser(user)
+            # if the link is empty
+            if (link == ""):
+                # just add the user
+                new_list.append(user)
+            else:
+                # otherwise, add a html link
+                new_list.append(f'<a href="{link}" target="_blank">{user}</a>')
+        # return the completed list
+        return new_list
+
     # Try for a case-insensitive exact match
     def getTitleMatch(self, powername):
         titles = self.readSqlData(f"SELECT name FROM powers WHERE name like \"{powername}\"")
@@ -356,56 +373,42 @@ class PowerIndex:
                 return csv_list[0]
         return None
 
-    # this will take a list of users and search duckduckgo.com for wikia or wikipedia links
-    def getUserLinks(self, user_list: list) -> list:
-        # try to get links, but if an exception occurs, return the input list
+    # this will take a list of users and search google.com for more information
+    def _getLinkForUser(self, user: str) -> str:
+        # a place to store the connection object
+        conn = None
+        # value returned from the sql statement
+        link = ""
+        # try to execute some sql
         try:
-            # the list or urls we are building
-            linked_users = []
-            # create a requests session to try and speed up the process
-            with Session() as session:
-                # change user agents so google gives us a better page to search
-                headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"}
-                # go through the input user list
-                for user in user_list:
-                    # search google.com for the user
-                    web_data = session.get(f"https://www.google.com/search?q={user}", timeout=(5, 15), headers=headers)
-                    # create a bs4 object and parse the returned page
-                    soup = BeautifulSoup(web_data.text, features="html.parser")
-                    # get the divs from the results
-                    divs = soup.findAll("div", attrs={"class": "r"})
-                    # set our stop variable
-                    found_link_for_user = False
-                    # loop through the divs looking for links
-                    for div in divs:
-                        # check our stop variable
-                        if (found_link_for_user is True):
-                            # we found our link so move to the next user
-                            break
-                        # get all the links from the page so we can look through them
-                        links = div.findAll("a", href=True)
-                        # go through the links
-                        for link in links:
-                            domains = ["fandom.com", "wikia.com", "wikipedia.org"]
-                            # and look for our wanted domains
-                            if (any(domain in link["href"] for domain in domains)):
-                                # unquote the link so it launches a new page correctly
-                                clean_link = unquote(link["href"])
-                                # create the link for our user and add to our list
-                                linked_users.append(f'<a href="{clean_link}" target="_blank">{user}</a>')
-                                # we only need one link so we can stop our loop here
-                                found_link_for_user = True
-                                break
-                    # check if we found a link
-                    if (found_link_for_user is False):
-                        # no links were found, just add the user
-                        linked_users.append(user)
-            # return our complete list
-            return linked_users
+            # connect to the database (and create the file)
+            conn = sqlite3.connect(self.links_db_file)
+            # create a cursor
+            cur = conn.cursor()
+            # get the known user link from the links database
+            sql = "SELECT link FROM links WHERE name=?"
+            # get the link data as a list
+            data = list(cur.execute(sql, [user]))
+            # check if the list has anything in it
+            if (len(data) >= 1):
+                # get the first row of the data
+                first_row = data[0]
+                # check if the tuple has any items
+                if (len(first_row) >= 1):
+                    # set the link to the first item in the tuple
+                    link = first_row[0]
+            # close the database connection
+            conn.close()
         except Exception as e:
-            # if any exception happens, just return the original list
-            print(f"USER LINKS FAILED! ({e})")
-            return user_list
+            print(f"There was an error executing the SQL statement:\nError: {e}")
+            # we don't know what is in link, so set it to an empty string
+            link = ""
+        finally:
+            # close the connection
+            if (conn is not None):
+                conn.close()
+        # return the error value
+        return link
 
 
 def main():
