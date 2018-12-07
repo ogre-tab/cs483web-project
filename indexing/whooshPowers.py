@@ -42,17 +42,17 @@ class PowerData:
         if (self.name is None):
             self.name = ""
         if (self.description is None):
-            self.description = "No Description Available"
+            self.description = ""
         if (self.alias is None):
-            self.alias = ["(No Aliases for " + self.name + ")"]
+            self.alias = []
         if (self.application is None):
             self.application = []
         if (self.capability is None):
             self.capability = []
         if (self.user is None):
-            self.user = ["No Known Users"]
+            self.user = [] 
         if (self.limitation is None):
-            self.limitation = ["No known Limitations or Counter-Abilities"]
+            self.limitation = []
         if (self.association is None):
             self.association = []
         if (self.path is None):
@@ -364,7 +364,7 @@ class PowerIndex:
         for user in user_list:
             user = user.replace('"', '&quot;')
             url = f"http://www.google.com/search?q={user}+site:wikipedia.org+OR+site:wikia.com&btnI"
-            link = f'<a href="{url}" target="_blank">{user}</a>'
+            link = f'<a href="{url}" class="user-button" target="_blank">{user}</a><br><br>'
             new_list.append(link)
         return new_list
 

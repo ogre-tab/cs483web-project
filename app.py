@@ -124,6 +124,19 @@ def popPowerDiv(power_name):
     power_pic = getPowerPic(power_name)
     # if powerdata has image link, put it here
 
+    if len(power_data.description) == 0:
+        power_data.description = "No Description Available"
+    if len(power_data.alias) == 0:
+        power_data.alias = ["(No Aliases for " + power_data.name + ")"]
+    if len(power_data.application) == 0:
+        power_data.application = ["No known Limitations or Counter-Abilities"]
+    if len(power_data.capability) == 0:
+        power_data.capability = ["Capabilities of this power are unknown."]
+    if len(power_data.user) == 0:
+        power_data.user = ["No Known Users"]
+    if len(power_data.limitation) == 0:
+        power_data.limitation = ["No known Limitations or Counter-Abilities"]
+        
     power_div = render_template(
         power_frame,
         power=power_data,
