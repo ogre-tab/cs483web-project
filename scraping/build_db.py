@@ -101,6 +101,9 @@ def main():
                 # get the associations
                 elif (associations_search in lower_title):
                     getContent(content, association)
+            # get the extended known users
+            elif (level == 3):
+                getContent(content, user)
         # check if the power is a category
         if (not alias and not application and not capability and not user and not limitation and not association):
             # don't add the category

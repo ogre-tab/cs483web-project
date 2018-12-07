@@ -50,7 +50,7 @@ class PowerData:
         if (self.capability is None):
             self.capability = []
         if (self.user is None):
-            self.user = [] 
+            self.user = []
         if (self.limitation is None):
             self.limitation = []
         if (self.association is None):
