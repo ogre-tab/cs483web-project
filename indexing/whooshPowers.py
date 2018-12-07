@@ -364,7 +364,7 @@ class PowerIndex:
         for user in user_list:
             user = user.replace('"', '&quot;')
             url = f"http://www.google.com/search?q={user}+site:wikipedia.org+OR+site:wikia.com&btnI"
-            link = f'<a href="{url}" target="_blank">{user}</a>'
+            link = f'<a href="{url}" class="user-button" target="_blank">{user}</a><br><br>'
             new_list.append(link)
         return new_list
 
