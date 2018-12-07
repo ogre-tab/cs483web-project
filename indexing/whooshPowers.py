@@ -352,7 +352,21 @@ class PowerIndex:
 
         # create the power data object and return it
         power_data = PowerData(*power)
+        if (power_data.user is not None):
+            if (len(power_data.user) >= 1):
+                if (power_data.user[0] != "No Known Users"):
+                    power_data.user = self.getGoogleSearchLinks(power_data.user)
         return power_data
+
+    # create a google search link for the known user
+    def getGoogleSearchLinks(self, user_list: list) -> list:
+        new_list = []
+        for user in user_list:
+            user = user.replace('"', '&quot;')
+            url = f"http://www.google.com/search?q={user}+site:wikipedia.org+OR+site:wikia.com&btnI"
+            link = f'<a href="{url}" target="_blank">{user}</a>'
+            new_list.append(link)
+        return new_list
 
     # Try for a case-insensitive exact match
     def getTitleMatch(self, powername):
