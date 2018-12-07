@@ -215,9 +215,66 @@ def insertRow(dbfile: str, name: str, description: str, alias: list, application
     sql = f"INSERT OR REPLACE INTO powers ({columns}) VALUES(?,?,?,?,?,?,?,?)"
     # our values we are going to inser
     values = (name, description, listToCsv(alias), listToCsv(application),
-              listToCsv(capability), listToCsv(user), listToCsv(limitation),
-              listToCsv(association))
+              listToCsv(capability), listToCsv(cleanUser(user)),
+              listToCsv(limitation), listToCsv(cleanAssociation(association)))
     executeSql(dbfile, sql, values)
+
+
+# remove any 'see also' type users
+def cleanUser(user_list: list) -> list:
+    # create a new list
+    cleaned_list = []
+    # go through each know user
+    for user in user_list:
+        # and remove any that are 'see also'
+        if ("see also:" not in user.lower()):
+            cleaned_list.append(user)
+    # return our cleaned list
+    return cleaned_list
+
+
+# remove any extra text from associated powers
+def cleanAssociation(associate_list: list) -> list:
+    # create a new list
+    cleaned_list = []
+    # go through each association
+    for associate in associate_list:
+        # remopve any that have forward slashes
+        if ("/" in associate):
+            continue
+        # split the line at each space
+        split = associate.split(" ")
+        # this is the string we are going to build
+        new_string = ""
+        # our stop boolean
+        word_not_capitalized = False
+        # loop through the split word
+        for word in split:
+            # check that we have a word
+            if (len(word) >= 1):
+                # check if the first letter is a capital
+                if (word[0].isupper()):
+                    # some associations might have extra stuff behind it
+                    if (":" in word):
+                        # remove the color, and don't get any more words
+                        word = word.replace(":", "")
+                        word_not_capitalized = True
+                    # add to our string we are building
+                    new_string = f"{new_string} {word}"
+                else:
+                    # set our loop to stop
+                    word_not_capitalized = True
+                # stop when we have no more capitalized words
+                if (word_not_capitalized is True):
+                    break
+            else:
+                # skip the short word
+                continue
+        # if our new string is long enough, add the string to our list
+        if (len(new_string) >= 4):
+            cleaned_list.append(new_string.strip())
+    # return our built list
+    return cleaned_list
 
 
 # convert a list to a csv style string
