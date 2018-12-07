@@ -232,8 +232,8 @@ def cleanUser(user_list: list) -> list:
         # and remove any that are 'see also'
         if ("see also:" not in user.lower()):
             cleaned_list.append(user)
-    # return our cleaned list
-    return cleaned_list
+    # sort and return our cleaned list
+    return sorted(cleaned_list)
 
 
 # remove any extra text from associated powers
@@ -276,8 +276,8 @@ def cleanAssociation(associate_list: list) -> list:
         # if our new string is long enough, add the string to our list
         if (len(new_string) >= 4):
             cleaned_list.append(new_string.strip())
-    # return our built list
-    return cleaned_list
+    # sort and return our built list
+    return sorted(cleaned_list)
 
 
 # convert a list to a csv style string
