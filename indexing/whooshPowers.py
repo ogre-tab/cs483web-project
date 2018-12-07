@@ -24,7 +24,7 @@ class PowerData:
         self.association = self.csvStringToList(association)
         self.path = name.replace(" ", "_")
         self.normalize()
-    
+
     def asDict(self):
         d = {}
         d['name'] = self.name
@@ -50,7 +50,7 @@ class PowerData:
         if (self.capability is None):
             self.capability = []
         if (self.user is None):
-            self.user = [] 
+            self.user = []
         if (self.limitation is None):
             self.limitation = []
         if (self.association is None):
@@ -354,8 +354,7 @@ class PowerIndex:
         power_data = PowerData(*power)
         if (power_data.user is not None):
             if (len(power_data.user) >= 1):
-                if (power_data.user[0] != "No Known Users"):
-                    power_data.user = self.getGoogleSearchLinks(power_data.user)
+                power_data.user = self.getGoogleSearchLinks(power_data.user)
         return power_data
 
     # create a google search link for the known user
