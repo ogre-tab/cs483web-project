@@ -7,6 +7,9 @@ from flask import Flask, render_template, request
 # import browse
 from indexing.whooshPowers import PowerIndex
 from power_pictures import getPowerPic
+from power_pictures import linkScraping
+
+from scraping.navData.catscraping import readJSONIndex
 
 
 # template file names
@@ -169,24 +172,13 @@ def getPowerDataJSON(power_name):
 def getSearchResults(keywordquery):
     # Returns list of search resultsgetTitleMatches
     print('Keyword Query is: ' + keywordquery)
-    results = []
-    
     # normal whoooshy results
-    wooshy = powerIndex.search(keywordquery)
-    
-    # can we get any exact match on this word?
-    exact_match = powerIndex.getTitleMatch(keywordquery)
-    if exact_match is not None and exact_match not in wooshy:
-        results += exact_match
-    
-    results += wooshy
-    
-    # Do we need to check for no-list?
-    return results
+    return powerIndex.search(keywordquery)
 
 
-# This doesn't work yet!  Almost there!
-from scraping.navData.catscraping import readJSONIndex
+@app.route('/ps/<power_name>')
+def linkScrape(power_name):
+    return linkScraping(power_name)
 
 
 # build our nav index:

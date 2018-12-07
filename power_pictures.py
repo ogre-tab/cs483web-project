@@ -28,6 +28,20 @@ def getPowerPic(page_name):
     return power_pic
 
 
+def linkScraping(power_name):
+    pl_api = "http://powerlisting.wikia.com/api.php"
+    params = {
+        'action': 'query',
+        'prop': 'revisions',
+        'rvprop': 'content',
+        'titles': power_name
+    }
+    links = ""
+    S = requests.Session()
+    print(f"getting links for {params}")
+    links_raw = S.get(url=pl_api, params=params)
+    return links_raw.text
+
 # from bs4 import BeautifulSoup
 
 # # adapted from pierson's image-getter function

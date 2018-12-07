@@ -15,6 +15,7 @@ function getPowerView(power_name){
 			console.log("retrieved data for " + power_name);
 			//console.log(power_data)
 			document.getElementById("power-view").innerHTML = power_data;
+			window.scrollTo(0,0);
 		}
 	};
 	xmlhttp.open("GET", `search?div=pow&power=${encodeURIComponent(power_name)}`, true);
@@ -145,4 +146,30 @@ function getResultsPage(nav_char){
 		current_page_num = parseInt(nav_char);
 	}
 	popPowerList();
+}
+
+
+/* this doesn't really work but it was worth a shot! */
+function getUsers(){
+	power_name = current_power;
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			res = this.responseText;
+			console.log("retrieved data for " + power_name);
+			power_links = res;
+			var ku = res.split("==Known Users==")[1];
+			var users = ku.split(/\n==\w/)[0];
+			var kusers = users.split("\n");
+			known_users = "";
+			for (var i = 0; i < kusers.length; i++){
+				var line = kusers[i];
+				
+			}
+			
+			document.getElementById("users").innerHTML = users;
+		}
+	};
+	xmlhttp.open("GET", `ps/${encodeURIComponent(power_name)}`, true);
+	xmlhttp.send();
 }
