@@ -70,7 +70,11 @@ def main():
         # create our url to pull data from
         url = f"http://powerlisting.wikia.com/api/v1/Articles/AsSimpleJson?id={power_id}"
         # get the power json and add the power to the dictionary
-        powers[power_name] = json.loads(urlopen(url).read().decode("utf-8"))["sections"]
+        try:
+            powers[power_name] = json.loads(urlopen(url).read().decode("utf-8"))["sections"]
+        except Exception:
+            # on any error, just keep going
+            continue
         # update the count
         count = count + 1
         # update the progress
