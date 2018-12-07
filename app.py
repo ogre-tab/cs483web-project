@@ -172,8 +172,16 @@ def getPowerDataJSON(power_name):
 def getSearchResults(keywordquery):
     # Returns list of search resultsgetTitleMatches
     print('Keyword Query is: ' + keywordquery)
+    
+    exact = powerIndex.getTitleMatch(keywordquery)
+    wooshy = powerIndex.search(keywordquery)
+    if exact in wooshy:
+        wooshy.remove(exact)
+    results = [exact]
+    results += wooshy
     # normal whoooshy results
-    return powerIndex.search(keywordquery)
+    return results
+    # return powerIndex.search(keywordquery)
 
 
 @app.route('/ps/<power_name>')
