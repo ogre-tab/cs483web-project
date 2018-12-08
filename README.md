@@ -16,7 +16,7 @@ Compatible Web Browsers:
 * Chrome
 * Firefox
 
-##### To run:
+### To run:
 	Clone the repository.
 		https://github.com/ogre-tab/cs483web-project.git
 	
