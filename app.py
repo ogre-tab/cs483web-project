@@ -6,8 +6,8 @@ from flask import Flask, render_template, request
 # browse currently unused
 # import browse
 from indexing.whooshPowers import PowerIndex
-from power_pictures import getPowerPic
-from power_pictures import linkScraping
+from scraping.power_pictures import getPowerPic
+from scraping.power_pictures import linkScraping
 
 from scraping.navData.catscraping import readJSONIndex
 
@@ -166,6 +166,7 @@ def getSearchResults(keywordquery):
         # remove duplicate entry if it exists
         if exact in whooshy:
             whooshy.remove(exact)
+
     results += whooshy
     return results
 

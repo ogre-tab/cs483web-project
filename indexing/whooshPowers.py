@@ -378,7 +378,7 @@ class PowerIndex:
             csv_list = list(csv_r)
             if (len(csv_list) > 0):
                 print(csv_list)
-                return csv_list[0]
+                return csv_list[0][0]
         return None
 
 
