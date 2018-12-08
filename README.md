@@ -26,6 +26,6 @@ Compatible Web Browsers:
 	Note: The database, powers.db, will be in scraping/powerData.
 	
 	Run 'app.py' to start the flask webserver.
-		app will load and build the whoosh index on first load
+		The program will start and build the whoosh index on start up.
 	
-	Navigate to page provided in link in terminal
+	Navigate to the page provided by a link in the terminal.
