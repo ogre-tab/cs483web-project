@@ -8,7 +8,6 @@ Requires Internet Access
 
 Required Python Modules:
 * flask
-* PyQt5
 * requests
 * sqlite3
 * whoosh
@@ -17,15 +16,16 @@ Compatible Web Browsers:
 * Chrome
 * Firefox
 
-To run:
+##### To run:
 	Clone the repository.
 		https://github.com/ogre-tab/cs483web-project.git
 	
 	Build the Database:
-		run navigation/scrape.py
-		run navigation/build_db.py
+		run scraping/scrape.py
+		run scraping/build_db.py
+	Note: The database, powers.db, will be in scraping/powerData.
 	
 	Run 'app.py' to start the flask webserver.
-		app will load and build the whoosh database on first load
+		app will load and build the whoosh index on first load
 	
 	Navigate to page provided in link in terminal
