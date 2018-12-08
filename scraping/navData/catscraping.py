@@ -1,6 +1,8 @@
 #!/usr/bin/python3
-import requests
 import json
+import os
+
+import requests
 
 S = requests.Session()
 """
@@ -27,19 +29,53 @@ categories = [
     'Category:Mimicry',
     'Category:Manipulations',
     'Category:Almighty_Powers'
-    ]
+]
+
+# folders
+scrape_folder_name = "scraping"
+navdata_folder_name = "navData"
+
+# files
+power_cats_txt_name = "power_cats.txt"
+power_members_txt_name = "power_members.txt"
+power_cats_json_name = "power_cats.json"
+
+
+# get our file names and folder paths
+def get_paths() -> dict:
+    # file paths will get stored in a dictionary
+    fileDict = {}
+    # get our working folder
+    cwd = os.getcwd()
+    # get the base folder of our working folder
+    base = os.path.basename(os.path.normpath(cwd))
+    # check if our base is our target folder
+    if (base == navdata_folder_name):
+        # since our base is our target folder, create the paths without the base added
+        fileDict[power_cats_txt_name] = os.path.join(cwd, power_cats_txt_name)
+        fileDict[power_members_txt_name] = os.path.join(cwd, power_members_txt_name)
+        fileDict[power_cats_json_name] = os.path.join(cwd, power_cats_json_name)
+        fileDict[navdata_folder_name] = cwd
+    else:
+        # since our base is NOT our target folder, create the paths WITH the base added
+        fileDict[power_cats_txt_name] = os.path.join(cwd, scrape_folder_name, navdata_folder_name, power_cats_txt_name)
+        fileDict[power_members_txt_name] = os.path.join(cwd, scrape_folder_name, navdata_folder_name, power_members_txt_name)
+        fileDict[power_cats_json_name] = os.path.join(cwd, scrape_folder_name, navdata_folder_name, power_cats_json_name)
+        fileDict[navdata_folder_name] = os.path.join(cwd, scrape_folder_name, navdata_folder_name)
+    # return our file paths
+    return fileDict
 
 
 class PowerNavTree(object):
     def __init__(self):
-        self.cats = loadNavIndex()      
-    
+        self.cats = loadNavIndex()
+
     def getSubcategoryOf(self, cat):
         res = []
         if cat in self.cats:
             res = self.cats.get(cat).sub_cat
         return res
-    
+
     def getCatNav(self, cat_name):
         for cat in self.cats:
             if cat_name == cat.name:
@@ -54,13 +90,12 @@ class PowerNav(object):
         self.adjacent = []
         self.sub_cat = []
         self.members = []
-    
+
     def getMembers(self):
         self.members = []
         self.members += getCategoryMembers(self)
-    
+
     def __repr__(self):
-        
         return f"{self.name}"
         # cat_prefix = "Category:"
         # if cat_prefix in self.name:
@@ -75,7 +110,7 @@ class PowerNav(object):
             par = par.parent
         path += f"{self}"
         return path
-    
+
     def __dict__(self):
         d = {}
         if self.parent is not None:
@@ -98,7 +133,6 @@ class PowerNav(object):
 
 def loadNavIndex():
     j_index = readJSONIndex()
-    
     return j_index
 
 
@@ -109,34 +143,47 @@ def main():
 
 
 def buildTextIndex():
-    subcats = buildNavIndex()    
+    # get file paths
+    files = get_paths()
+    power_cats_txt = files[power_cats_txt_name]
+    power_members_txt = files[power_members_txt_name]
+
+    subcats = buildNavIndex()
     members = []
     for cat in subcats:
         members += getCategoryMembers(cat)
-    with open('power_cats.txt', 'w', encoding='utf-8') as file:
+    with open(power_cats_txt, 'w', encoding='utf-8') as file:
         for cat in subcats:
             file.write(f"{cat.getCatPath()} ({len(cat.sub_cat)} subs)" + '\n')
     file.close()
 
-    with open('power_members.txt', 'w', encoding='utf-8') as file:
+    with open(power_members_txt, 'w', encoding='utf-8') as file:
         for power in members:
             file.write(f"{power.getCatPath()}" + '\n')
     file.close()
 
 
 def buildJSONIndex():
-    subcats = buildNavIndex()   
+    # get file paths
+    files = get_paths()
+    power_cats_json = files[power_cats_json_name]
+
+    subcats = buildNavIndex()
     nav_dict = {}
     for cat in subcats:
         nav_dict[cat.name] = cat.__dict__()
-    with open('power_cats.json', 'w', encoding='utf-8') as file:
+    with open(power_cats_json, 'w', encoding='utf-8') as file:
         file.write(json.dumps(nav_dict))
     file.close()
 
 
 def readJSONIndex():
+    # get file paths
+    files = get_paths()
+    power_cats_json = files[power_cats_json_name]
+
     nav_dict = {}
-    with open('power_cats.json', 'r', encoding='utf-8') as file:
+    with open(power_cats_json, 'r', encoding='utf-8') as file:
         nav_dict = json.load(file)
     return nav_dict
 
@@ -178,7 +225,7 @@ def getCategoryMembers(category):
 
     try:
         members = cm_json['query']['categorymembers']
-        print(f"found {len(members)} members in {category}")    
+        print(f"found {len(members)} members in {category}")
         if len(members) == 500:
             print("REQUEST CAP HIT, CATEGORY TOO BIG?")
         for power in members:
@@ -204,7 +251,7 @@ def getSubcats(category):
     subcats = []
     try:
         members = subcat_json['query']['categorymembers']
-        print(f"found {len(members)} sub-categories in {category}")    
+        print(f"found {len(members)} sub-categories in {category}")
         for subcat in members:
             found_cat = PowerNav(subcat['title'], category)
             category.sub_cat.append(found_cat)
@@ -212,7 +259,7 @@ def getSubcats(category):
             subcats.append(found_cat)
     except KeyError:
         print(f"error while getting sub-categories of {category}")
-    
+
     for subcat in subcats:
         print(f"{category}-->{subcat}")
     return subcats
