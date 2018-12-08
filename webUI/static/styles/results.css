@@ -196,6 +196,8 @@ h3{
     border-color: black;
     padding:12px;
     transform: rotate(-1deg);
+    max-height:512px;
+    overflow:auto;
 }
 .counters {
     grid-area: cntr;
@@ -205,6 +207,9 @@ h3{
     
     padding:12px;
     transform: rotate(1deg);
+    
+    max-height:512px;
+    overflow:auto;
 }
 .assoc {
     grid-area: assc;
@@ -214,6 +219,9 @@ h3{
     
     padding:12px;
     transform: rotate(1deg);
+    
+    max-height:512px;
+    overflow:auto;
 }
 html { height: 100%; }
 a:hover, a:visited, a:link, a:active { text-decoration: none; }
