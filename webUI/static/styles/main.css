@@ -24,7 +24,7 @@ h1, h2, h3, h4, h5, h6 {
 #searchbar{
     font-family: "Comic Sans MS", cursive, sans-serif;
     width:60%;
-    font-size:24pt;
+    font-size:32pt;
 }
 .button {
     border:none;
@@ -74,9 +74,12 @@ td {
     text-align: center;
     background-color: rgba(255, 223, 0,1);
     height: 100px;
+    
     width: 100%;
     border-style: solid;
     border-color: black;
+    
+    transform: rotate(-3deg);
 }
 
 div {

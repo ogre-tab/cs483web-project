@@ -1,4 +1,4 @@
-
+/* JS Application which powers the functions on 'results.html' */
 var current_power = "" 
 var current_page_num = 1
 var keywordquery = ""
@@ -23,13 +23,14 @@ function getPowerView(power_name){
 	document.getElementById("power-view").innerHTML =  "<h2>Loading...</h2>";   // Blank page
 }
 
+/* call this function to search */
 function searchFor(query){
 	keywordquery = query;
 	current_page_num = 1;
 	getSearchResultsList(query);
 }
 
-
+/* function returns search results list */
 function getSearchResultsList(query){
 	keywordquery=query
 	current_page_num = 1
@@ -51,7 +52,7 @@ function getSearchResultsList(query){
 	power_list = [];
 }
 
-
+/* Explore Categories in results pane */
 function getCategory(cat_name){
 	var xmlhttp = new XMLHttpRequest();
 	xmlhttp.onreadystatechange = function() {
@@ -70,7 +71,7 @@ function getCategory(cat_name){
 	power_list = [];
 }
 
-
+/* Generates HTML string for a link */
 function getLinkButton(power_link){
 	var cat_link = getCategoryName(power_link);
 	if (cat_link != null){
@@ -80,7 +81,7 @@ function getLinkButton(power_link){
 		return `<button class="pow-button" id="${power_link}" onclick="getPowerView(this.id)"><span>${power_link}</span></button>`
 }
 
-
+/* Combine two lists of results into one */
 function combineLists(subcats, powers){
 	list = [];
 	s = subcats.length;
@@ -96,6 +97,7 @@ function combineLists(subcats, powers){
 	return list;
 }
 
+/* renders current value of power_list to the results pane */
 function popPowerList(){
 	var pow_buttons = ""
 	var results_per_page = 10;
@@ -106,11 +108,10 @@ function popPowerList(){
 	for (var i = start_pow; i<end_pow && i < power_list.length; i++ ){
 		var pow = power_list[i];
 		pow_buttons += getLinkButton(pow) + "\n";
-		//button autofocus
 	}
 	document.getElementById("power-list").innerHTML = pow_buttons;
 	
-	/* POWER NAV */
+	/* NAVIGATION BUTTONS */
 	pages = power_list.length / results_per_page;
 	
 	var nav_pages = "";
@@ -127,7 +128,7 @@ function popPowerList(){
 	
 }
 
-
+/* Strip the "Category" prefix of any category name before rendering to browser */
 function getCategoryName(category_path){
 	var prefix = "Category:";
 	if (category_path.includes(prefix)){
@@ -136,7 +137,7 @@ function getCategoryName(category_path){
 	return null;
 }
 
-
+/* get page of results */
 function getResultsPage(nav_char){
 	if (nav_char == '>'){
 		current_page_num += 1;
@@ -164,12 +165,16 @@ function getUsers(){
 			known_users = "";
 			for (var i = 0; i < kusers.length; i++){
 				var line = kusers[i];
-				
 			}
-			
 			document.getElementById("users").innerHTML = users;
 		}
 	};
 	xmlhttp.open("GET", `ps/${encodeURIComponent(power_name)}`, true);
 	xmlhttp.send();
+}
+
+/* For demonstration, this is our page with NO CSS STYLES */
+function nostyle(){
+	d = document.styleSheets[0].disabled
+	document.styleSheets[0].disabled = !d
 }
