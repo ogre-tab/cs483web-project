@@ -11,7 +11,6 @@ from scraping.power_pictures import linkScraping
 
 from scraping.navData.catscraping import readJSONIndex
 
-
 # template file names
 home_page = "welcome_page.html"
 results_page = "results.html"
@@ -30,7 +29,6 @@ app.static_folder = os.path.join("webUI", "static")
 
 # create our power index
 powerIndex = PowerIndex()
-
 
 """ API Arguments:
         # term to request search results
@@ -114,7 +112,7 @@ def popPowerDiv(power_name):
     power_data = powerIndex.getPower(power_name)
     if power_data is None:
         return render_template(power_frame_null)
-        # return f"Invalid Power Page: {power_name}" 
+        # return f"Invalid Power Page: {power_name}"
 
     power_pic = getPowerPic(power_name)
     # if powerdata has image link, put it here
@@ -148,7 +146,7 @@ def getPowerDataJSON(power_name):
         print(d)
         return json.dumps(d)
     else:
-        return f"Invalid Power Page: {power_name}" 
+        return f"Invalid Power Page: {power_name}"
 
 
 def getSearchResults(keywordquery):
@@ -182,7 +180,7 @@ def getSubcategoriesJSON(category_name):
     # experimental function to get subcategories
     categories = readJSONIndex()
     if category_name == "all":
-        return json.dumps(categories) 
+        return json.dumps(categories)
     return json.dumps(categories[category_name])
 
 
@@ -201,15 +199,15 @@ def popResultsDiv(keywordquery, page_num):
     if (page_num > last_page):
         page_num = last_page
 
-    page_start = (page_num -1) * results_per_page
+    page_start = (page_num - 1) * results_per_page
     page_end = min(total_count, page_start + results_per_page)
     results_list = results_list[page_start:page_end]
 
-    pages = [] 
+    pages = []
     if page_num > 1:
         pages.append("<")
     for i in range(0, last_page):
-        if i == page_num-1:
+        if i == page_num - 1:
             pages.append(f"[{i+1}]")
         else:
             pages.append(f"{i+1}")
